@@ -1,0 +1,104 @@
+spring:
+  flyway:
+    enabled: true
+    # H2 基线（db/migration/h2）为裸表名（无 schema），与 Oracle 版（db/migration/oracle）成对维护
+    url: jdbc:h2:file:./data/h2/audit;MODE=Oracle;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    user: sa
+    password:
+    baseline-on-migrate: true
+    validate-on-migrate: false       # 暂时关闭启动时的严格文件校验，防止死锁
+    locations: classpath:db/migration/h2
+    encoding: UTF-8
+    table: flyway_schema_history
+    out-of-order: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  datasource:
+    druid:
+      stat-view-servlet:
+        enabled: true
+        loginUsername: scaffold
+        loginPassword: 123456
+    dynamic:
+      primary: master
+      strict: false
+      druid:
+        initial-size: 5
+        min-idle: 5
+        max-active: 20
+        max-wait: 60000
+        time-between-eviction-runs-millis: 60000
+        min-evictable-idle-time-millis: 300000
+        validation-query: SELECT 1 FROM DUAL
+        connectTimeout: 30000
+        socketTimeout: 60000
+        test-while-idle: true
+        test-on-borrow: false
+        test-on-return: false
+        pool-prepared-statements: true
+        max-pool-prepared-statement-per-connection-size: 20
+        filters: stat,slf4j
+        connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      datasource:
+        master:
+          driver-class-name: org.h2.Driver
+          url: jdbc:h2:file:./data/h2/audit;MODE=Oracle;AUTO_SERVER=TRUE
+          username: sa
+          password:
+
+# 雪花 ID（审计表主键应用侧生成，common-core 自动装配）；多实例部署时各实例 worker-id 必须不同（0~31）
+scaffold:
+  snowflake:
+    worker-id: 1
+    data-center-id: 1
+
+
+# 国密信封加密过滤器（规范 V1.2：随机 SM4 加密业务数据 + SM2 加密 SM4 密钥 + 会话 SM2 签名）
+# enabled=true 时对 include-patterns 生效；签名密钥对由后端按会话签发（GET /gm-sign-key，
+# 私钥经 TLS 下发给已登录会话，公钥绑 token 存 Redis），登出/过期即销毁，无构建期注入。
+# /gm-sign-key 在白名单中（bootstrap 请求不套信封、不验签）；sign-key-ttl 须与会话有效期同量级
+sm:
+  envelope:
+    enabled: false
+    include-patterns: ['/**']
+    exclude-patterns: ['/gm-key', '/gm-sign-key', '/v3/api-docs/**', '/actuator/**']
+    timestamp-window: 5m
+    sign-key-ttl: 30m
+
+#logging:
+#  level:
+#    com.alibaba.nacos: WARN
+#    com.alibaba.nacos.client.config: WARN
+#    com.alibaba.nacos.client.config.listener: ERROR
+
+dubbo:
+  application:
+    metadata-type: remote
+    name: scaffold-audit-service
+    logger: slf4j
+    qos-enable: true
+    qos-port: 22225
+    check-serializable: false
+    serialize-check-status: WARN
+  protocol:
+    name: dubbo
+    port: 20885
+    ext-protocol: tri
+    preferred-protocol: tri
+  scan:
+    base-packages: com.scaffold.audit
+  registry:
+    address: nacos://${nacos.address:172.26.205.13}:8848
+    username: ${NACOS_USER:nacos}
+    password: ${NACOS_PWD:nacos}
+    register-mode: instance
+
+# JWT SM2 验签公钥：与签发方（scaffold-auth/gateway）同一对（dev 联调；生产经 Nacos/环境变量注入）。
+# SecurityContextFilter 恢复 LOGIN_USER 时要用它解 token 取 userKey 反查 Redis，缺失则登录态丢失
+jwt:
+  sm2:
+    public-key: "04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61"

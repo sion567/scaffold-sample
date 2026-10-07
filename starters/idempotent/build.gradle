@@ -1,0 +1,10 @@
+// 由 Maven pom.xml 平移生成（依赖坐标与作用域一一对应）
+
+plugins {
+    id 'scaffold.java-conventions'
+}
+
+dependencies {
+    api project(':scaffold-common-redis')
+    api 'org.springframework.boot:spring-boot-starter-aop'
+}

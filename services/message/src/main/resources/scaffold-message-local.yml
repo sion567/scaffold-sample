@@ -1,0 +1,67 @@
+spring:
+  flyway:
+    enabled: true
+    url: jdbc:h2:mem:message;MODE=Oracle;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    driver-class-name: org.h2.Driver
+    user: sa
+    password: ''
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    locations: classpath:db/migration/h2
+    encoding: UTF-8
+    table: flyway_schema_history
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:message;MODE=Oracle;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    username: sa
+    password:
+
+dubbo:
+  application:
+    name: scaffold-message
+    logger: slf4j
+    qos-enable: true
+    qos-port: 22226
+    check-serializable: false
+    serialize-check-status: WARN
+  registry:
+    address: nacos://${nacos.address:172.26.205.13}:8848
+    username: ${NACOS_USER:nacos}
+    password: ${NACOS_PWD:nacos}
+    register-mode: instance
+  consumer:
+    # 启动不强依赖 provider 在线（system 重启期间消息服务可正常对外）
+    check: false
+
+gm:
+  # 国密（BouncyCastle 实现）：短信通道密钥/邮箱授权码 SM4 字段加解密；密钥与 auth/system 同一套
+  # （BCFKS keystore，dev 密钥库随仓库 gm/gm.bcfks，仅限本地联调；存量 gm.p12 用 GmKeystoreConvertTool 转换）
+  # 生产：密钥不入仓库，path/store-pass/key-pass 全部走环境变量或配置中心
+  keystore:
+    path: ${GM_STORE_PATH:./gm/gm.bcfks}
+    store-pass: ${GM_STORE_PASS:StorePass123}
+    key-pass: ${GM_KEY_PASS:KeyPass123}
+    format: BCFKS
+    active-alias: ${GM_ACTIVE_ALIAS:202607-h1}
+    reload-interval: 300
+    fail-fast: true
+  sm4:
+    root-key-dir: ${GM_SM4_PATH:E:/etc/app/gm}
+    root-key-version: v1
+    reload-interval: 300
+
+# JWT SM2 验签公钥：与签发方（scaffold-auth/gateway）同一对（dev 联调；生产经 Nacos/环境变量注入）。
+# SecurityContextFilter 恢复 LOGIN_USER 时要用它解 token 取 userKey 反查 Redis，缺失则登录态丢失
+jwt:
+  sm2:
+    public-key: "04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61"
+
+message:
+  sms:
+    # Mock 渠道开关（本地/演示默认 true；真实厂商通道 P4 接入后置 false）
+    mock-enabled: true

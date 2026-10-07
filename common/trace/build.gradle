@@ -1,0 +1,11 @@
+// 由 Maven pom.xml 平移生成（依赖坐标与作用域一一对应）
+
+plugins {
+    id 'scaffold.java-conventions'
+}
+
+dependencies {
+    api project(':scaffold-common-core')
+    api 'org.slf4j:slf4j-api'
+    compileOnly 'org.apache.dubbo:dubbo'
+}

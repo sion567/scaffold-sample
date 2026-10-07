@@ -1,0 +1,122 @@
+package ${packageName}.api;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+#foreach($column in $columns)
+#if($column.query && $column.queryType != "BETWEEN" && $column.javaType == 'Date')
+import org.springframework.format.annotation.DateTimeFormat;
+import java.util.Date;
+#break
+#end
+#end
+#if($table.crud || $table.sub)
+import com.scaffold.common.core.web.page.TableDataInfo;
+#end
+import com.scaffold.common.core.web.domain.AjaxResult;
+import ${packageName}.domain.${ClassName};
+
+/**
+ * ${functionName}Resource（Triple REST 对外接口）
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+@RequestMapping("/${businessName}")
+public interface ${ClassName}Resource
+{
+    /**
+     * 查询${functionName}列表
+     */
+#if($table.crud || $table.sub)
+    @GetMapping("/list")
+    TableDataInfo list(@RequestParam(value = "pageNum", required = false) Integer pageNum,
+                       @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                       @RequestParam(value = "orderByColumn", required = false) String orderByColumn,
+                       @RequestParam(value = "isAsc", required = false) String isAsc
+#foreach($column in $columns)
+#if($column.query)
+#if($column.queryType == "BETWEEN")
+                       , @RequestParam(value = "${column.javaField}Begin", required = false) String ${column.javaField}Begin
+                       , @RequestParam(value = "${column.javaField}End", required = false) String ${column.javaField}End
+#elseif($column.javaType == 'Date')
+                       , @RequestParam(value = "${column.javaField}", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ${column.javaField}
+#else
+                       , @RequestParam(value = "${column.javaField}", required = false) ${column.javaType} ${column.javaField}
+#end
+#end
+#end
+                       );
+#elseif($table.tree)
+    @GetMapping("/list")
+    AjaxResult list(@RequestParam(value = "pageNum", required = false) Integer pageNum,
+                    @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                    @RequestParam(value = "orderByColumn", required = false) String orderByColumn,
+                    @RequestParam(value = "isAsc", required = false) String isAsc
+#foreach($column in $columns)
+#if($column.query)
+#if($column.queryType == "BETWEEN")
+                    , @RequestParam(value = "${column.javaField}Begin", required = false) String ${column.javaField}Begin
+                    , @RequestParam(value = "${column.javaField}End", required = false) String ${column.javaField}End
+#elseif($column.javaType == 'Date')
+                    , @RequestParam(value = "${column.javaField}", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ${column.javaField}
+#else
+                    , @RequestParam(value = "${column.javaField}", required = false) ${column.javaType} ${column.javaField}
+#end
+#end
+#end
+                    );
+#end
+
+    /**
+     * 导出${functionName}列表
+     */
+    @PostMapping("/export")
+    @RequestMapping(value = "/export", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    byte[] export(@RequestParam(value = "pageNum", required = false) Integer pageNum,
+                  @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                  @RequestParam(value = "orderByColumn", required = false) String orderByColumn,
+                  @RequestParam(value = "isAsc", required = false) String isAsc
+#foreach($column in $columns)
+#if($column.query)
+#if($column.queryType == "BETWEEN")
+                  , @RequestParam(value = "${column.javaField}Begin", required = false) String ${column.javaField}Begin
+                  , @RequestParam(value = "${column.javaField}End", required = false) String ${column.javaField}End
+#elseif($column.javaType == 'Date')
+                  , @RequestParam(value = "${column.javaField}", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ${column.javaField}
+#else
+                  , @RequestParam(value = "${column.javaField}", required = false) ${column.javaType} ${column.javaField}
+#end
+#end
+#end
+                  );
+
+    /**
+     * 获取${functionName}详细信息
+     */
+    @GetMapping(value = "/{${pkColumn.javaField}}")
+    AjaxResult getInfo(@PathVariable("${pkColumn.javaField}") ${pkColumn.javaType} ${pkColumn.javaField});
+
+    /**
+     * 新增${functionName}
+     */
+    @PostMapping
+    AjaxResult add(@RequestBody ${ClassName} ${className});
+
+    /**
+     * 修改${functionName}
+     */
+    @PutMapping
+    AjaxResult edit(@RequestBody ${ClassName} ${className});
+
+    /**
+     * 删除${functionName}
+     */
+    @DeleteMapping("/{${pkColumn.javaField}s}")
+    AjaxResult remove(@PathVariable("${pkColumn.javaField}s") String ${pkColumn.javaField}s);
+}

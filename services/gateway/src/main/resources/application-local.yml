@@ -1,0 +1,30 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        # 复用开发机注册中心，本地能调通下游服务；
+        # 想完全单机：enabled: false（路由改用 scaffold-gateway-local.yml 里的直连写法）
+        enabled: true
+        server-addr: ${nacos.address:172.26.205.13}:8848
+      config:
+        # 本地不连配置中心：application.yml 里的 optional:nacos: 导入自动跳过，
+        # 业务配置改由下方 classpath:scaffold-gateway-local.yml 提供
+        enabled: false
+    sentinel:
+      datasource:
+        local-file:
+          file:
+            file: classpath:flow-rules.json
+            data-type: json
+            rule-type: flow
+  config:
+    import:
+      - classpath:scaffold-gateway-local.yml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+debug: true

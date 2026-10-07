@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package com.scaffold.audit.api;
+
+option java_package = "com.scaffold.audit.api.proto";
+option java_multiple_files = true;
+option java_outer_classname = "RemoteAuditProto";
+
+
+// 审计内部 RPC（IDL 模式，Triple/protobuf）：采集服务(police/gov-collector) -> scaffold-audit
+// 约定同 remote_user.proto：code/msg 对齐 R<T>，null <-> 默认值，Date <-> int64 毫秒。
+// 审计日志防篡改：仅追加，不提供修改/删除接口。
+service RemoteAuditService {
+
+  // 保存采集留痕日志（collector 采集回执/失败记录）
+  rpc SaveCollectorAudit(SaveCollectorAuditRequest) returns (BoolResponse);
+
+  // 保存查询审计日志（谁、何时、查了谁、返回什么）
+  rpc SaveQueryAudit(SaveQueryAuditRequest) returns (BoolResponse);
+}
+
+message SaveCollectorAuditRequest {
+  CollectorAuditLogProto audit_log = 1;
+  string source = 2;
+}
+
+message SaveQueryAuditRequest {
+  QueryAuditLogProto audit_log = 1;
+  string source = 2;
+}
+
+// 对齐 com.scaffold.system.api.domain.CollectorAuditLog
+message CollectorAuditLogProto {
+  int64 id = 1;
+  // 领域标识(police/gov/ship...)
+  string domain = 2;
+  // 数据源标识(PIRS_API/PIRS_FILE/DWH_CZRK...)
+  string source = 3;
+  // 通道类型(API/FILE/DB/MQ)
+  string channel_type = 4;
+  // 结果：0-成功 1-失败
+  string status = 5;
+  int64 record_count = 6;
+  string watermark_before = 7;
+  string watermark_after = 8;
+  string error_msg = 9;
+  // 耗时(毫秒)
+  int64 cost_ms = 10;
+  int64 start_time = 11;
+  int64 create_time = 12;
+}
+
+// 对齐 com.scaffold.system.api.domain.QueryAuditLog
+message QueryAuditLogProto {
+  int64 id = 1;
+  // 调用方系统标识(UI/DATASCREEN/POLICE_COLLECTOR...)
+  string caller_system = 2;
+  // 操作员账号(系统触发为 SYSTEM)
+  string operator_name = 3;
+  string subject_uid = 4;
+  // 查询对象摘要(脱敏)
+  string subject_masked = 5;
+  // 查询类型(RISK_CHECK/TRAJECTORY/DETAIL...)
+  string query_type = 6;
+  string purpose = 7;
+  string request_id = 8;
+  int64 result_count = 9;
+  // 返回摘要(脱敏后的字段清单，不含明文)
+  string result_summary = 10;
+  int64 query_time = 11;
+}
+
+message BoolResponse {
+  int32 code = 1;
+  string msg = 2;
+  bool data = 3;
+}

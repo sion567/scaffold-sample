@@ -1,0 +1,23 @@
+// 由 Maven pom.xml 平移生成（依赖坐标与作用域一一对应）
+
+plugins {
+    id 'scaffold.boot-conventions'
+}
+
+dependencies {
+    api 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+    api project(':scaffold-common-security')
+    api project(':scaffold-common-log')
+    api project(':scaffold-api-system')
+    api project(':scaffold-api-message')
+    api 'org.apache.dubbo:dubbo-rest-openapi'
+    api project(':scaffold-spring-boot-starter-gm')
+    api 'org.apache.dubbo:dubbo-spring-boot-starter'
+    testImplementation project(':scaffold-spring-boot-starter-test')
+    api 'org.springframework.boot:spring-boot-starter-mail'
+    api 'org.flywaydb:flyway-core'
+    api 'org.flywaydb:flyway-database-oracle'
+    api 'com.oracle.database.jdbc:ojdbc11'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
+}

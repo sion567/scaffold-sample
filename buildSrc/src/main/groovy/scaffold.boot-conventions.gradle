@@ -1,0 +1,11 @@
+// Spring Boot 服务模块约定（原 spring-boot-maven-plugin repackage 等价：bootJar 为主产物）
+plugins {
+    id 'scaffold.java-conventions'
+    id 'org.springframework.boot'
+}
+
+// 与原 <finalName>${project.artifactId}</finalName> 一致：产物名 = 项目名（无版本号，
+// 启动脚本/镜像构建按固定名取件，不用感知版本号）
+tasks.named('bootJar') {
+    archiveFileName = "${project.name}.jar"
+}

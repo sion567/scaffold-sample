@@ -1,0 +1,17 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+// buildSrc 是独立构建：显式读取根 gradle.properties 取版本
+def scaffoldProps = new Properties()
+file("../gradle.properties").withInputStream { scaffoldProps.load(it) }
+
+repositories {
+    gradlePluginPortal()
+    maven { url = uri('https://maven.aliyun.com/repository/public') }
+}
+
+dependencies {
+    // 约定插件以类型方式应用 Spring Boot 插件（版本与主构建一致）
+    implementation "org.springframework.boot:spring-boot-gradle-plugin:${scaffoldProps.getProperty('springBootVersion')}"
+}

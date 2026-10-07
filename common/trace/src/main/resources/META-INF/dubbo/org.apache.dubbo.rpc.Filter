@@ -1,0 +1,2 @@
+traceConsumerFilter=com.scaffold.common.trace.dubbo.TraceDubboConsumerFilter
+traceProviderFilter=com.scaffold.common.trace.dubbo.TraceDubboProviderFilter

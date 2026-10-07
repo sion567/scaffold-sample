@@ -1,0 +1,30 @@
+-- ${functionName}菜单 SQL（Oracle）
+-- 页面菜单 + 按钮权限；menu_id 取当前最大值之后依次分配，如需固定 ID 段请手动调整
+DECLARE
+  base NUMBER;
+BEGIN
+  SELECT NVL(MAX(menu_id), 0) INTO base FROM sys_menu;
+
+  -- 页面菜单
+  INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, query, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+  VALUES (base + 1, '${functionName}', ${parentMenuId}, 1, '${businessName}', '${moduleName}/${businessName}/index', '', 1, 0, 'C', '0', '0', '${permissionPrefix}:list', '#', 'admin', sysdate, '${functionName}菜单');
+
+  -- 按钮权限
+  INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, query, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+  VALUES (base + 2, '${functionName}查询', base + 1, 1, '', '', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:query', '#', 'admin', sysdate, '');
+
+  INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, query, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+  VALUES (base + 3, '${functionName}新增', base + 1, 2, '', '', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:add', '#', 'admin', sysdate, '');
+
+  INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, query, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+  VALUES (base + 4, '${functionName}修改', base + 1, 3, '', '', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:edit', '#', 'admin', sysdate, '');
+
+  INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, query, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+  VALUES (base + 5, '${functionName}删除', base + 1, 4, '', '', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:remove', '#', 'admin', sysdate, '');
+
+  INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, query, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+  VALUES (base + 6, '${functionName}导出', base + 1, 5, '', '', '', 1, 0, 'F', '0', '0', '${permissionPrefix}:export', '#', 'admin', sysdate, '');
+END;
+/
+
+COMMIT;

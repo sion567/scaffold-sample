@@ -1,0 +1,13 @@
+// 由 Maven pom.xml 平移生成（依赖坐标与作用域一一对应）
+
+plugins {
+    id 'scaffold.java-conventions'
+}
+
+dependencies {
+    api 'com.fasterxml.jackson.core:jackson-annotations'
+    api 'org.slf4j:slf4j-api'
+    api 'org.apache.commons:commons-csv'
+    api 'org.lionsoul:ip2region'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

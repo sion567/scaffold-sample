@@ -1,0 +1,40 @@
+# ============================================================
+# scaffold-gateway 网关服务镜像（28080）
+# 参考 ch_tourist/docker/ct/gateway/dockerfile 风格
+#
+# 构建（在仓库根目录执行）：
+#   mvn clean package -DskipTests
+#   cp services/gateway/target/scaffold-*.jar docker/gateway/jar/
+#   docker build -t ${REGISTRY}scaffold-gateway:${TAG} -f docker/gateway/dockerfile docker/gateway
+#
+# jar 说明：各服务 pom 已设 <finalName>${project.artifactId}</finalName>，
+# 产物形如 services/gateway/target/scaffold-gateway.jar（无版本号），
+# 因此这里统一用 scaffold-*.jar 通配；Jenkinsfile.simple 会自动完成拷贝。
+# ============================================================
+
+# 基础镜像（JRE 即可，无需 JDK；也可换 openjdk:17）
+FROM eclipse-temurin:17-jre
+# author
+MAINTAINER scaffold
+
+# 时区/编码约定（与宿主机 Asia/Shanghai、UTF-8 保持一致）
+ENV TZ=Asia/Shanghai \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    # JVM 参数由 .env / compose 注入，留默认值便于单独 docker run
+    JAVA_OPTS=-Xms64m -Xmx256m -XX:+UseG1GC
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
+    && mkdir -p /home/scaffold/logs
+
+# 挂载日志目录
+VOLUME /home/scaffold/logs
+
+# 指定路径
+WORKDIR /home/scaffold
+
+# 复制 jar 文件到路径（scaffold-*.jar 通配，目录内只放一个服务的 jar）
+COPY ./jar/scaffold-*.jar /home/scaffold/app.jar
+
+# 启动网关服务（sh -c 以消费 $JAVA_OPTS）
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

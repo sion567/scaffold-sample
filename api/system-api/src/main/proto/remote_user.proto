@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package com.scaffold.system.api;
+
+option java_package = "com.scaffold.system.api.proto";
+option java_multiple_files = true;
+option java_outer_classname = "RemoteUserProto";
+
+import "common.proto";
+
+// 用户内部 RPC（IDL 模式，Triple/protobuf）：scaffold-auth -> scaffold-system
+// 约定：
+// 1) 响应内嵌 code/msg 对齐 Java R<T>（200 成功 / 500 失败），IDL 层不抛业务异常；
+// 2) proto3 标量无 null 语义：Java null <-> 默认值（空串/0/false），Date <-> int64 毫秒时间戳（0 表示 null）；
+// 3) BaseEntity.searchValue/params（查询辅助与 MyBatis 专用字段）不进契约。
+service RemoteUserService {
+
+  // 按用户名查询登录用户（含角色/权限集合）；查不到时 code=500
+  rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
+
+  // 自助注册用户；注册关闭或账号已存在时 code=500
+  rpc RegisterUserInfo(RegisterUserInfoRequest) returns (BoolResponse);
+
+  // 记录登录 IP/登录时间
+  rpc RecordUserLogin(RecordUserLoginRequest) returns (BoolResponse);
+}
+
+message GetUserInfoRequest {
+  string username = 1;
+  // 内部调用来源标识（SecurityConstants.INNER），供 @InnerAuth 校验
+  string source = 2;
+}
+
+message RegisterUserInfoRequest {
+  SysUserProto user = 1;
+  string source = 2;
+}
+
+message RecordUserLoginRequest {
+  SysUserProto user = 1;
+  string source = 2;
+}
+
+message GetUserInfoResponse {
+  int32 code = 1;
+  string msg = 2;
+  LoginUserProto data = 3;
+}
+
+// 对齐 com.scaffold.system.api.model.LoginUser
+message LoginUserProto {
+  string token = 1;
+  int64 userid = 2;
+  string username = 3;
+  int64 login_time = 4;
+  int64 expire_time = 5;
+  string ipaddr = 6;
+  repeated string permissions = 7;
+  repeated string roles = 8;
+  SysUserProto sys_user = 9;
+}
+
+// 对齐 com.scaffold.system.api.domain.SysUser（含 BaseEntity 审计字段）
+message SysUserProto {
+  int64 user_id = 1;
+  int64 dept_id = 2;
+  string user_name = 3;
+  string nick_name = 4;
+  string email = 5;
+  string phonenumber = 6;
+  string sex = 7;
+  string avatar = 8;
+  string password = 9;
+  string status = 10;
+  string del_flag = 11;
+  string login_ip = 12;
+  int64 login_date = 13;
+  int64 pwd_update_date = 14;
+  SysDeptProto dept = 15;
+  repeated SysRoleProto roles = 16;
+  repeated int64 role_ids = 17;
+  repeated int64 post_ids = 18;
+  int64 role_id = 19;
+  // ---- BaseEntity ----
+  string create_by = 20;
+  int64 create_time = 21;
+  string update_by = 22;
+  int64 update_time = 23;
+  string remark = 24;
+  int32 version = 25;
+}
+
+// 对齐 com.scaffold.system.api.domain.SysDept
+message SysDeptProto {
+  int64 dept_id = 1;
+  int64 parent_id = 2;
+  string ancestors = 3;
+  string dept_name = 4;
+  int32 order_num = 5;
+  string leader = 6;
+  string phone = 7;
+  string email = 8;
+  string status = 9;
+  string del_flag = 10;
+  string parent_name = 11;
+  repeated SysDeptProto children = 12;
+  // ---- BaseEntity ----
+  string create_by = 13;
+  int64 create_time = 14;
+  string update_by = 15;
+  int64 update_time = 16;
+  string remark = 17;
+  int32 version = 18;
+}
+
+// 对齐 com.scaffold.system.api.domain.SysRole
+message SysRoleProto {
+  int64 role_id = 1;
+  string role_name = 2;
+  string role_key = 3;
+  int32 role_sort = 4;
+  string data_scope = 5;
+  bool menu_check_strictly = 6;
+  bool dept_check_strictly = 7;
+  string status = 8;
+  string del_flag = 9;
+  bool flag = 10;
+  repeated int64 menu_ids = 11;
+  repeated int64 dept_ids = 12;
+  repeated string permissions = 13;
+  // ---- BaseEntity ----
+  string create_by = 14;
+  int64 create_time = 15;
+  string update_by = 16;
+  int64 update_time = 17;
+  string remark = 18;
+  int32 version = 19;
+}

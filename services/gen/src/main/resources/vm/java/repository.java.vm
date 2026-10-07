@@ -1,0 +1,17 @@
+package ${packageName}.repository;
+
+import org.springframework.stereotype.Repository;
+
+import com.scaffold.common.core.jpa.ScaffoldRepository;
+import ${packageName}.domain.${ClassName};
+
+/**
+ * ${functionName} 数据访问（泛型基接口派生：CRUD + Specification 动态条件）
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+@Repository
+public interface ${ClassName}Repository extends ScaffoldRepository<${ClassName}, ${pkColumn.javaType}>
+{
+}

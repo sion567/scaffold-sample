@@ -1,0 +1,69 @@
+# CI 质量流水线（第一级）：任意分支推送 / MR 即触发
+# build(编译打包) -> test(单测) 与 verify(静态检查) 并行；产物经 artifacts 传递，避免重复编译、重复测试
+# 部署仍走 Jenkins 主流水线（见 Jenkinsfile.simple），本文件只做质量门禁
+#
+# 构建系统已从 Maven 迁移到 Gradle 9（Groovy DSL，2026-10）
+workflow:
+  rules:
+    # 所有分支推送 + MR 事件都建流水线（同一提交有开放 MR 时会跑两条，介意可加去重规则）
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+stages:
+  - build
+  - test
+  - verify
+
+variables:
+  GIT_DEPTH: "1"                # 浅克隆加速；工程不依赖 git 历史
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-home"
+
+default:
+  # 内网拉不到 Docker Hub 时换成私有 registry 地址，如 registry.cn-hangzhou.aliyuncs.com/<ns>/gradle:9.4-jdk17
+  image: gradle:9.4-jdk17
+
+# 按分支缓存 Gradle 依赖与 wrapper 分发目录，避免每次重新下载
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .gradle-home/caches
+    - .gradle-home/wrapper
+
+# 阶段1：编译打包（产物传给下游，避免 test/verify 重复编译）
+build-job:
+  stage: build
+  script:
+    - sh gradlew clean bootJar jar -x test
+  artifacts:
+    paths:
+      - "**/build/classes"
+      - "**/build/libs"
+    expire_in: 1 hour
+
+# 阶段2：单元测试（与 verify 并行；测试结果进 GitLab 测试报告）
+test-job:
+  stage: test
+  needs: [build-job]
+  script:
+    - sh gradlew test
+  artifacts:
+    when: always
+    reports:
+      # 多模块：报告在各模块 build 下，必须用 ** 通配
+      junit: "**/build/test-results/test/TEST-*.xml"
+
+# 阶段3：静态检查（Checkstyle / PMD-P3C，规则集复用 build-tools 目录；报告模式不拦截）
+# 变异测试（PIT）：Maven 版 pitest-maven 已随迁移移除，Gradle 版插件（info.solidsoft.pitest）待引入，
+# 引入前改动包的变异测试按 AGENTS.md §3 要求在本地以 Maven 侧回退方式执行并贴报告
+verify-job:
+  stage: verify
+  needs: [build-job]
+  script:
+    - sh gradlew checkstyleMain pmdMain -x test
+  artifacts:
+    when: always
+    paths:
+      - "**/build/reports/pmd"
+      - "**/build/reports/checkstyle"
+    expire_in: 1 week

@@ -1,0 +1,33 @@
+# ============================================================
+# scaffold-auth 认证服务镜像（HTTP 9200 / Dubbo tri 20880）
+# 构建：mvn clean package -DskipTests
+#       cp services/auth/target/scaffold-*.jar docker/auth/jar/
+#       docker build -t ${REGISTRY}scaffold-auth:${TAG} -f docker/auth/dockerfile docker/auth
+# jar 说明：finalName=artifactId，产物无版本号，通配 scaffold-*.jar
+# ============================================================
+
+# 基础镜像
+FROM eclipse-temurin:17-jre
+# author
+MAINTAINER scaffold
+
+# 时区/编码约定
+ENV TZ=Asia/Shanghai \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    JAVA_OPTS=-Xms64m -Xmx256m -XX:+UseG1GC
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
+    && mkdir -p /home/scaffold/logs
+
+# 挂载日志目录
+VOLUME /home/scaffold/logs
+
+# 指定路径
+WORKDIR /home/scaffold
+
+# 复制 jar 文件到路径
+COPY ./jar/scaffold-*.jar /home/scaffold/app.jar
+
+# 启动认证服务
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

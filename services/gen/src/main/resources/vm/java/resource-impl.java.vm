@@ -1,0 +1,225 @@
+package ${packageName}.api.impl;
+
+import java.util.List;
+#foreach($column in $columns)
+#if($column.query && $column.queryType != "BETWEEN" && $column.javaType == 'Date')
+import java.util.Date;
+#break
+#end
+#end
+import org.apache.dubbo.config.annotation.DubboService;
+import org.springframework.web.bind.annotation.PathVariable;
+import com.scaffold.common.core.text.Convert;
+import com.scaffold.common.core.utils.poi.ExcelUtil;
+import com.scaffold.common.core.web.controller.BaseController;
+import com.scaffold.common.core.web.domain.AjaxResult;
+#if($table.crud || $table.sub)
+import com.scaffold.common.core.web.page.PageDomain;
+import com.scaffold.common.core.web.page.TableDataInfo;
+#end
+import com.scaffold.common.log.annotation.Log;
+import com.scaffold.common.log.enums.BusinessType;
+import com.scaffold.common.security.annotation.RequiresPermissions;
+#set($hasAuditBy = false)
+#foreach($column in $columns)
+#if($column.javaField == 'createBy' || $column.javaField == 'updateBy')
+#set($hasAuditBy = true)
+#end
+#end
+#if($hasAuditBy)
+import com.scaffold.common.security.utils.SecurityUtils;
+#end
+import ${packageName}.api.${ClassName}Resource;
+import ${packageName}.domain.${ClassName};
+import ${packageName}.service.I${ClassName}Service;
+
+/**
+ * ${functionName}Resource实现（Triple REST）
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+@DubboService(protocol = "tri")
+public class ${ClassName}ResourceImpl extends BaseController implements ${ClassName}Resource
+{
+    private final I${ClassName}Service ${className}Service;
+
+    public ${ClassName}ResourceImpl(I${ClassName}Service ${className}Service) {
+        this.${className}Service = ${className}Service;
+    }
+
+    /**
+     * 查询${functionName}列表
+     */
+    @RequiresPermissions("${permissionPrefix}:list")
+    @Override
+#if($table.crud || $table.sub)
+    public TableDataInfo list(Integer pageNum, Integer pageSize, String orderByColumn, String isAsc
+#foreach($column in $columns)
+#if($column.query)
+#if($column.queryType == "BETWEEN")
+            , String ${column.javaField}Begin, String ${column.javaField}End
+#else
+            , ${column.javaType} ${column.javaField}
+#end
+#end
+#end
+    )
+    {
+        ${ClassName} ${className} = new ${ClassName}();
+#foreach($column in $columns)
+#if($column.query && $column.queryType != "BETWEEN")
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+        ${className}.set${AttrName}(${column.javaField});
+#end
+#end
+#foreach($column in $columns)
+#if($column.query && $column.queryType == "BETWEEN")
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+        ${className}.getParams().put("begin${AttrName}", ${column.javaField}Begin);
+        ${className}.getParams().put("end${AttrName}", ${column.javaField}End);
+#end
+#end
+        PageDomain page = new PageDomain();
+        page.setPageNum(pageNum);
+        page.setPageSize(pageSize);
+        page.setOrderByColumn(orderByColumn);
+        page.setIsAsc(isAsc);
+        return ${className}Service.select${ClassName}Page(${className}, page);
+    }
+#elseif($table.tree)
+    public AjaxResult list(Integer pageNum, Integer pageSize, String orderByColumn, String isAsc
+#foreach($column in $columns)
+#if($column.query)
+#if($column.queryType == "BETWEEN")
+            , String ${column.javaField}Begin, String ${column.javaField}End
+#else
+            , ${column.javaType} ${column.javaField}
+#end
+#end
+#end
+    )
+    {
+        ${ClassName} ${className} = new ${ClassName}();
+#foreach($column in $columns)
+#if($column.query && $column.queryType != "BETWEEN")
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+        ${className}.set${AttrName}(${column.javaField});
+#end
+#end
+#foreach($column in $columns)
+#if($column.query && $column.queryType == "BETWEEN")
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+        ${className}.getParams().put("begin${AttrName}", ${column.javaField}Begin);
+        ${className}.getParams().put("end${AttrName}", ${column.javaField}End);
+#end
+#end
+        return success(${className}Service.select${ClassName}List(${className}));
+    }
+#end
+
+    /**
+     * 导出${functionName}列表
+     */
+    @Log(title = "${functionName}", businessType = BusinessType.EXPORT)
+    @RequiresPermissions("${permissionPrefix}:export")
+    @Override
+    public byte[] export(Integer pageNum, Integer pageSize, String orderByColumn, String isAsc
+#foreach($column in $columns)
+#if($column.query)
+#if($column.queryType == "BETWEEN")
+            , String ${column.javaField}Begin, String ${column.javaField}End
+#else
+            , ${column.javaType} ${column.javaField}
+#end
+#end
+#end
+    )
+    {
+        ${ClassName} ${className} = new ${ClassName}();
+#foreach($column in $columns)
+#if($column.query && $column.queryType != "BETWEEN")
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+        ${className}.set${AttrName}(${column.javaField});
+#end
+#end
+#foreach($column in $columns)
+#if($column.query && $column.queryType == "BETWEEN")
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+        ${className}.getParams().put("begin${AttrName}", ${column.javaField}Begin);
+        ${className}.getParams().put("end${AttrName}", ${column.javaField}End);
+#end
+#end
+        List<${ClassName}> list = ${className}Service.select${ClassName}List(${className});
+        ExcelUtil<${ClassName}> util = new ExcelUtil<${ClassName}>(${ClassName}.class);
+        return util.exportExcel(list, "${functionName}数据");
+    }
+
+    /**
+     * 获取${functionName}详细信息
+     */
+    @RequiresPermissions("${permissionPrefix}:query")
+    @Override
+    public AjaxResult getInfo(@PathVariable ${pkColumn.javaType} ${pkColumn.javaField})
+    {
+        return success(${className}Service.select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaField}));
+    }
+
+    /**
+     * 新增${functionName}
+     */
+    @RequiresPermissions("${permissionPrefix}:add")
+    @Log(title = "${functionName}", businessType = BusinessType.INSERT)
+    @Override
+    public AjaxResult add(${ClassName} ${className})
+    {
+#set($hasCreateBy = false)
+#foreach($column in $columns)
+#if($column.javaField == 'createBy')
+#set($hasCreateBy = true)
+#end
+#end
+#if($hasCreateBy)
+        ${className}.setCreateBy(SecurityUtils.getUsername());
+#end
+        return toAjax(${className}Service.insert${ClassName}(${className}));
+    }
+
+    /**
+     * 修改${functionName}
+     */
+    @RequiresPermissions("${permissionPrefix}:edit")
+    @Log(title = "${functionName}", businessType = BusinessType.UPDATE)
+    @Override
+    public AjaxResult edit(${ClassName} ${className})
+    {
+#set($hasUpdateBy = false)
+#foreach($column in $columns)
+#if($column.javaField == 'updateBy')
+#set($hasUpdateBy = true)
+#end
+#end
+#if($hasUpdateBy)
+        ${className}.setUpdateBy(SecurityUtils.getUsername());
+#end
+        return toAjax(${className}Service.update${ClassName}(${className}));
+    }
+
+    /**
+     * 删除${functionName}
+     */
+    @RequiresPermissions("${permissionPrefix}:remove")
+    @Log(title = "${functionName}", businessType = BusinessType.DELETE)
+    @Override
+    public AjaxResult remove(@PathVariable String ${pkColumn.javaField}s)
+    {
+#if(${pkColumn.javaType} == 'Long')
+        ${className}Service.delete${ClassName}By${pkColumn.capJavaField}s(Convert.toLongArray(${pkColumn.javaField}s));
+#elseif(${pkColumn.javaType} == 'Integer')
+        ${className}Service.delete${ClassName}By${pkColumn.capJavaField}s(Convert.toIntArray(${pkColumn.javaField}s));
+#else
+        ${className}Service.delete${ClassName}By${pkColumn.capJavaField}s(Convert.toStrArray(${pkColumn.javaField}s));
+#end
+        return success();
+    }
+}

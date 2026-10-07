@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package com.scaffold.file.api;
+
+option java_package = "com.scaffold.file.api.proto";
+option java_multiple_files = true;
+option java_outer_classname = "RemoteFileProto";
+
+
+// 文件内部 RPC（IDL 模式，Triple/protobuf）：各服务 -> scaffold-file
+// 约定：code/msg 对齐 Java R<T>（200 成功 / 500 失败），IDL 层不抛业务异常。
+service RemoteFileService {
+
+  // 上传文件（二进制内容 + 文件名），成功返回文件信息
+  rpc Upload(UploadRequest) returns (UploadResponse);
+
+  // 删除文件；URL 非法时 code=500
+  rpc Delete(DeleteFileRequest) returns (BoolResponse);
+}
+
+message UploadRequest {
+  bytes file = 1;
+  string name = 2;
+}
+
+message UploadResponse {
+  int32 code = 1;
+  string msg = 2;
+  SysFileProto data = 3;
+}
+
+message DeleteFileRequest {
+  string file_url = 1;
+}
+
+// 对齐 com.scaffold.file.api.domain.SysFile
+message SysFileProto {
+  string name = 1;
+  string url = 2;
+}
+
+message BoolResponse {
+  int32 code = 1;
+  string msg = 2;
+  bool data = 3;
+}

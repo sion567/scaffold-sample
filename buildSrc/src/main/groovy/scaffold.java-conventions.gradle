@@ -1,0 +1,86 @@
+// 所有 Java 库模块的公共约定（对应原 Maven 根 pom：编译参数 / BOM 平台 / 公共依赖 / 测试 / 报告模式静态检查）
+plugins {
+    id('java-library')
+    id('checkstyle')
+    id('pmd')
+}
+
+group = project.findProperty('group') ?: 'com.scaffold'
+version = project.findProperty('version') ?: '1.0-SNAPSHOT'
+
+java {
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+    // 对齐原 maven-compiler-plugin <parameters>true</parameters>
+    options.compilerArgs << '-parameters'
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+
+dependencies {
+    // 版本收口平台与公共依赖由根 build.gradle 的 subprojects 块统一注入（见根脚本说明）
+
+    // 根 pom 继承公共依赖：Nacos 配置中心（排除 druid，与原 <exclusions> 一致）
+    api('com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config') {
+        exclude group: 'com.alibaba', module: 'druid-spring-boot-starter'
+    }
+
+    // Maven 下 logback-classic 经 starter 传递进入（测试）编译类路径；Gradle 图中
+    // 被 nacos logback-adapter 的 POM 排除规则截断，显式补回（版本由 Boot BOM 收口）
+    testImplementation 'ch.qos.logback:logback-classic'
+
+    // 运行时同理被截断（starter-logging 的 logback-classic / log4j-to-slf4j 传递路径全被
+    // nacos adapter 的 POM 排除规则截掉，只剩 jul-to-slf4j），服务直接运行时 SLF4J/Log4j
+    // API 找不到提供者（NOP 静默日志）。按 starter-logging 原内容逐个直接声明补回——
+    // 直接声明不受传递路径上的 POM 排除规则影响（版本由 Boot BOM 收口）
+    runtimeOnly 'ch.qos.logback:logback-classic'
+    runtimeOnly 'org.apache.logging.log4j:log4j-to-slf4j'
+    runtimeOnly 'org.slf4j:jul-to-slf4j'
+
+    // Dubbo 3.3 Triple REST 运行时依赖 Gson + Jackson（含 JSR310 时间类型），
+    // 缺失时 Dubbo Model start 报 NoClassDefFoundError（gson/JavaTimeModule）；
+    // 此前经 BOM 误传的三方件（minio 等）捎带，BOM 改为纯 constraints 后须显式声明
+    // （版本由 Boot BOM 收口，仓库代码不直接 import 这些包）
+    runtimeOnly 'com.google.code.gson:gson'
+    runtimeOnly 'com.fasterxml.jackson.core:jackson-databind'
+    runtimeOnly 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // Gradle 9 不再自动注入 launcher，JUnit Platform 启动必需（版本由 Boot BOM 收口）
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// ── 静态检查（报告模式，不拦截；规则集复用 build-tools 目录，与原 -Psca 等价） ──
+checkstyle {
+    toolVersion = '11.1.0'   // 最后一代支持 JDK 17 的 Checkstyle
+    configFile = rootProject.file('build-tools/src/main/resources/checkstyle/checkstyle.xml')
+    showViolations = false
+    ignoreFailures = true    // 报告模式；转硬门禁时改 false
+}
+checkstyleTest.enabled = false
+
+pmd {
+    toolVersion = '6.55.0'   // p3c-pmd 2.1.1 仅兼容 PMD 6.x
+    consoleOutput = false
+    ignoreFailures = true    // 报告模式
+    ruleSets = []
+    ruleSetFiles = files(rootProject.file('build-tools/src/main/resources/pmd/pmd-ruleset.xml'))
+}
+pmd {
+    pmdMain {
+        excludes = ['**/proto/**/*.java']   // 生成的 proto/dubbo 桩不参与检查
+    }
+}
+dependencies {
+    pmd 'com.alibaba.p3c:p3c-pmd:2.1.1'   // 阿里 P3C 规则实现（PMD 6.x 引擎）
+}

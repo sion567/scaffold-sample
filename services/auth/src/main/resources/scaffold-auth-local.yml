@@ -1,0 +1,91 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+
+gm:
+  # 国密（BouncyCastle 实现，格式与原 zdhr-crypto 3.0 逐字节兼容）：BCFKS keystore（BC 专有
+  # 格式，避免 PKCS12 私钥袋跨 provider 兼容问题——pad block corrupted）；dev 密钥库随仓库
+  # （gm/gm.bcfks，相对各服务工作目录，仅限本地联调；存量 gm.p12 用 GmKeystoreConvertTool 转换）
+  # 生产：密钥不入仓库，path/store-pass/key-pass 全部走环境变量或配置中心
+  keystore:
+    path: ${GM_STORE_PATH:./gm/gm.bcfks}
+    store-pass: ${GM_STORE_PASS:StorePass123}
+    key-pass: ${GM_KEY_PASS:KeyPass123}
+    format: BCFKS
+    active-alias: ${GM_ACTIVE_ALIAS:202607-h1}
+    reload-interval: 300
+    fail-fast: true
+  sm4:
+    root-key-dir: ${GM_SM4_PATH:E:/etc/app/gm}
+    root-key-version: v1
+    reload-interval: 300
+  idx:
+    salt: ${GM_IDX_SALT:dev-idx-salt-2026}
+
+dubbo:
+  application:
+    name: scaffold-auth
+    logger: slf4j
+    qos-enable: true
+    qos-port: 22220
+    qos-accept-foreign-ip: false
+    check-serializable: false
+    serialize-check-status: WARN
+  protocol:
+    name: dubbo
+    port: 20880
+    ext-protocol: tri
+    preferred-protocol: tri
+    triple:
+      rest:
+        openapi:
+          enabled: true
+  scan:
+    base-packages: com.scaffold.auth
+  registry:
+    address: nacos://${nacos.address:172.26.205.13}:8848
+    username: ${NACOS_USER:nacos}
+    password: ${NACOS_PWD:nacos}
+    register-mode: instance
+
+# ── 双因子认证（可选的合规增强项，默认关闭）──────────────────────────
+# enabled=true 时，登录用户角色命中 required-roles（精确）或 required-role-prefixes
+# （前缀）的账号，登录必须额外通过 OTP 校验（验证码 5 分钟有效、60 秒冷却、失败 5 次锁定）。
+scaffold:
+  auth:
+    two-factor:
+      # 总开关：默认 false，脚手架默认形态不启用双因子
+      enabled: false
+      # 需要双因子的角色（与用户角色精确匹配）
+      required-roles:
+        - admin
+      # 需要双因子的角色前缀（与用户角色前缀匹配），按需开启，例如：
+      # required-role-prefixes:
+      #   - op_
+      required-role-prefixes: []
+    # ── 国密信封加密（可选的合规增强项，默认关闭）────────────────────
+    # enabled=true 时装配 GmEnvelopeDecryptor 并绑定到 Dubbo provider 过滤器
+    # GmEnvelopeDecryptFilter（SPI）：识别继承 GmEnvelopeBody 的接口参数
+    # （LoginBody/RegisterBody/UnLockBody），在反序列化后完成防重放、会话验签与
+    # SM2+SM4 信封解密并替换参数；需要前端信封协议配合且依赖国密 keystore。
+    # 关闭时脚手架按普通明文请求运行。GET/DELETE 与其余服务保持明文，传输安全由 HTTPS 承担。
+    gm-envelope:
+      enabled: true
+    # ── 图形验证码校验（登录/注册，信封解密后执行）──────────────────
+    # 验证码图片由网关生成下发（GET /captchaImage，网关侧配置 security.captcha.*），
+    # code/uuid 随登录/注册请求经信封解密后在本服务校验，因此校验开关在 auth 侧。
+    # 两处开关须保持一致：网关开而本服务关则校验形同虚设；网关关而本服务开则前端无码可填。
+    captcha:
+      enabled: true
+
+# ── JWT 国密签名密钥（SM2withSM3，JwtUtils @Value 注入）──────────────
+# ⚠ 仅本地开发联调使用：下面是公开的开发密钥对（hex 裸密钥：私钥 32B/64 字符、
+# 公钥 65B/130 字符 04||X||Y）。生产环境严禁使用此对，必须经 Nacos/环境变量
+# 注入正式密钥，且 scaffold-auth 与 scaffold-gateway 必须为同一对。
+jwt:
+  sm2:
+    private-key: "224d0cde8d6c8accb917d8d3759698f273495e01945b72584ac89034450b7488"
+    public-key: "04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61"

@@ -1,0 +1,67 @@
+server:
+  port: 28080
+
+spring:
+  application:
+    name: scaffold-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  main:
+    web-application-type: reactive
+  # 本服务无自有数据库（路由/鉴权不落库）：显式关闭被底座传递进来的
+  # JPA/Flyway/Druid 自动装配（common-core 携带 data-jpa），否则启动期
+  # Flyway/Hibernate/DataSource 初始化要求数据源配置，报 CannotFindDataSourceException。
+  # 注意：exclude 是整值覆盖属性，勿在 profile yml 里再单独设置（会丢掉这里的条目）
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+  cloud:
+    nacos:
+      username: ${NACOS_USER:nacos}
+      password: ${NACOS_PWD:nacos}
+      discovery:
+        server-addr: ${nacos.address:172.26.205.13}:8848
+      config:
+        server-addr: ${nacos.address:172.26.205.13}:8848
+    sentinel:
+      # 取消控制台懒加载
+      eager: true
+      transport:
+        dashboard: 192.168.40.237:8718
+      # nacos配置持久化
+      datasource:
+        ds1:
+          nacos:
+            server-addr: ${nacos.address:172.26.205.13}:8848
+            dataId: sentinel-scaffold-gateway
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: gw-flow
+  config:
+    # 配置文件格式
+    file-extension: yaml
+    import:
+      - classpath:scaffold-defaults.yml
+      - optional:nacos:application-${spring.profiles.active}.${spring.config.file-extension}?refreshEnabled=false
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}?refreshEnabled=true
+
+# 网关身份头签名密钥（P0-1）：生产经 Nacos 或环境变量注入；
+# 为空时 dev/test 环境跳过签名并告警，其余环境拒绝启动；下游验签默认 alert 模式灰度
+scaffold:
+  gateway:
+    internal:
+      secret: ${SCAFFOLD_GATEWAY_INTERNAL_SECRET:}
+    dynamic-routes:
+      # P2-5：动态路由——服务在 Nacos 注册 metadata 声明 gateway-path（如 system 服务声明 "system"），
+      # 即自动生成 Path=/system/** → lb://<service> 路由（服务名与路由前缀解耦），新服务零网关改动
+      enabled: true
+      refresh-seconds: 30
+
+# 无库服务：关闭 DataSource 健康检查（否则 /actuator/health 永远 DOWN）
+management:
+  health:
+    db:
+      enabled: false

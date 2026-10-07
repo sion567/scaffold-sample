@@ -1,0 +1,10 @@
+// 根脚本：仅做跨模块统一注入（模块自身配置在各模块 build.gradle + buildSrc 约定）
+// 平台注入放在根脚本：Gradle 9 下约定插件内 project(':bom') 的跨项目解析时机不可靠
+subprojects {
+    plugins.withId('java-library') {
+        dependencies {
+            // 版本收口平台（原 scaffold-bom import，置于最前：项目约束优先于框架 BOM）
+            api platform(project(':scaffold-bom'))
+        }
+    }
+}

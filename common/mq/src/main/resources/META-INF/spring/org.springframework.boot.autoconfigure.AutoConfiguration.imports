@@ -1,0 +1,3 @@
+com.scaffold.common.mq.kafka.IdempotentChecker
+com.scaffold.common.mq.kafka.KafkaConsumerGuardConfiguration
+com.scaffold.common.mq.kafka.KafkaProducerConfiguration

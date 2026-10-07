@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.scaffold.system.api;
+
+option java_package = "com.scaffold.system.api.proto";
+option java_multiple_files = true;
+option java_outer_classname = "SystemCommonProto";
+
+// 本模块内部 RPC 的共享消息（与同模块各 proto 保持同包，供 import 引用）。
+// 通用响应约定：code/msg 对齐 Java R<T>（200 成功 / 500 失败）。
+message BoolResponse {
+  int32 code = 1;
+  string msg = 2;
+  bool data = 3;
+}

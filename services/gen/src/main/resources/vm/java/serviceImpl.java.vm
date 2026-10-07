@@ -1,0 +1,254 @@
+package ${packageName}.service.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+#foreach ($column in $columns)
+#if($column.query && $column.queryType == "BETWEEN")
+import com.scaffold.common.core.utils.DateRanges;
+#break
+#end
+#end
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+#if($table.sub)
+import org.springframework.transaction.annotation.Transactional;
+import com.scaffold.common.core.utils.StringUtils;
+#end
+
+import com.scaffold.common.core.jpa.JpaSpecs;
+import com.scaffold.common.core.utils.PageUtils;
+import com.scaffold.common.core.web.page.PageDomain;
+import com.scaffold.common.core.web.page.TableDataInfo;
+import ${packageName}.domain.${ClassName};
+#if($table.sub)
+import ${packageName}.domain.${subClassName};
+#end
+import ${packageName}.repository.${ClassName}Repository;
+#if($table.sub)
+import ${packageName}.repository.${subClassName}Repository;
+#end
+import ${packageName}.service.I${ClassName}Service;
+
+/**
+ * ${functionName}Service业务层处理
+ *
+ * <p>JPA 范式：动态条件用 {@link JpaSpecs} 组装（对齐生成配置的查询列语义），
+ * CRUD 由 {@link ScaffoldRepository} 派生。
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+@Service
+public class ${ClassName}ServiceImpl implements I${ClassName}Service
+{
+    private final ${ClassName}Repository ${className}Repository;
+#if($table.sub)
+
+    private final ${subClassName}Repository ${subclassName}Repository;
+#end
+
+#if($table.sub)
+    public ${ClassName}ServiceImpl(${ClassName}Repository ${className}Repository, ${subClassName}Repository ${subclassName}Repository) {
+        this.${className}Repository = ${className}Repository;
+        this.${subclassName}Repository = ${subclassName}Repository;
+    }
+#else
+    public ${ClassName}ServiceImpl(${ClassName}Repository ${className}Repository) {
+        this.${className}Repository = ${className}Repository;
+    }
+#end
+
+    /**
+     * 查询${functionName}
+     *
+     * @param ${pkColumn.javaField} ${functionName}主键
+     * @return ${functionName}
+     */
+    @Override
+    public ${ClassName} select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField})
+    {
+        return ${className}Repository.findById(${pkColumn.javaField}).orElse(null);
+    }
+
+    /**
+     * 查询${functionName}列表
+     *
+     * @param ${className} ${functionName}
+     * @return ${functionName}
+     */
+    @Override
+    public List<${ClassName}> select${ClassName}List(${ClassName} ${className})
+    {
+        return ${className}Repository.list(toSpec(${className}), Sort.unsorted());
+    }
+
+    /**
+     * 分页查询${functionName}（JPA PageRequest 分页）
+     *
+     * @param ${className} ${functionName}
+     * @param page 分页参数
+     * @return 分页结果
+     */
+    @Override
+    public TableDataInfo select${ClassName}Page(${ClassName} ${className}, PageDomain page)
+    {
+        return TableDataInfo.from(${className}Repository.page(toSpec(${className}), PageUtils.toPageRequest(page)));
+    }
+
+    /**
+     * 新增${functionName}
+     *
+     * @param ${className} ${functionName}
+     * @return 结果
+     */
+#if($table.sub)
+    @Transactional
+#end
+    @Override
+    public int insert${ClassName}(${ClassName} ${className})
+    {
+#if($table.sub)
+        ${className}Repository.save(${className});
+        insert${subClassName}(${className});
+        return 1;
+#else
+        ${className}Repository.save(${className});
+        return 1;
+#end
+    }
+
+    /**
+     * 修改${functionName}
+     *
+     * @param ${className} ${functionName}
+     * @return 结果
+     */
+#if($table.sub)
+    @Transactional
+#end
+    @Override
+    public int update${ClassName}(${ClassName} ${className})
+    {
+#if($table.sub)
+        ${subclassName}Repository.deleteBy${subTableFkClassName}(${className}.get${pkColumn.capJavaField}());
+        insert${subClassName}(${className});
+#end
+        ${className}Repository.save(${className});
+        return 1;
+    }
+
+    /**
+     * 批量删除${functionName}
+     *
+     * @param ${pkColumn.javaField}s 需要删除的${functionName}主键集合
+     * @return 结果
+     */
+#if($table.sub)
+    @Transactional
+#end
+    @Override
+    public int delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaType}[] ${pkColumn.javaField}s)
+    {
+#if($table.sub)
+        for (${pkColumn.javaType} ${pkColumn.javaField} : ${pkColumn.javaField}s)
+        {
+            ${subclassName}Repository.deleteBy${subTableFkClassName}(${pkColumn.javaField});
+        }
+#end
+        ${className}Repository.deleteAllById(Arrays.asList(${pkColumn.javaField}s));
+        return ${pkColumn.javaField}s.length;
+    }
+
+    /**
+     * 删除${functionName}信息
+     *
+     * @param ${pkColumn.javaField} ${functionName}主键
+     * @return 结果
+     */
+#if($table.sub)
+    @Transactional
+#end
+    @Override
+    public int delete${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField})
+    {
+#if($table.sub)
+        ${subclassName}Repository.deleteBy${subTableFkClassName}(${pkColumn.javaField});
+#end
+        if (${className}Repository.existsById(${pkColumn.javaField})) {
+            ${className}Repository.deleteById(${pkColumn.javaField});
+            return 1;
+        }
+        return 0;
+    }
+#if($table.sub)
+
+    /**
+     * 新增${subTable.functionName}信息
+     *
+     * @param ${className} ${functionName}对象
+     */
+    public void insert${subClassName}(${ClassName} ${className})
+    {
+        List<${subClassName}> ${subclassName}List = ${className}.get${subClassName}List();
+        ${pkColumn.javaType} ${pkColumn.javaField} = ${className}.get${pkColumn.capJavaField}();
+        if (StringUtils.isNotNull(${subclassName}List))
+        {
+            List<${subClassName}> list = new ArrayList<${subClassName}>();
+            for (${subClassName} ${subclassName} : ${subclassName}List)
+            {
+                ${subclassName}.set${subTableFkClassName}(${pkColumn.javaField});
+                list.add(${subclassName});
+            }
+            if (list.size() > 0)
+            {
+                ${subclassName}Repository.saveAll(list);
+            }
+        }
+    }
+#end
+
+    /**
+     * 动态条件（对齐生成配置的查询列：EQ/LIKE/BETWEEN/GT/LT/NE）
+     */
+    private Specification<Object> toSpec(${ClassName} ${className})
+    {
+        if (${className} == null)
+        {
+            return JpaSpecs.alwaysTrue();
+        }
+        Specification<Object> spec = JpaSpecs.alwaysTrue();
+#foreach ($column in $columns)
+#if($column.query)
+#set($attrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.queryType == "LIKE")
+        spec = spec.and(JpaSpecs.likeIf("${column.javaField}", ${className}.get${attrName}()));
+#elseif($column.queryType == "EQ")
+#if($column.javaType == 'String')
+        spec = spec.and(JpaSpecs.eqIfNotBlank("${column.javaField}", ${className}.get${attrName}()));
+#else
+        spec = spec.and(JpaSpecs.eqIf("${column.javaField}", ${className}.get${attrName}()));
+#end
+#elseif($column.queryType == "NE")
+        spec = spec.and(JpaSpecs.neIf("${column.javaField}", ${className}.get${attrName}()));
+#elseif($column.queryType == "GT")
+        spec = spec.and(JpaSpecs.gtIf("${column.javaField}", ${className}.get${attrName}()));
+#elseif($column.queryType == "LT")
+        spec = spec.and(JpaSpecs.ltIf("${column.javaField}", ${className}.get${attrName}()));
+#elseif($column.queryType == "BETWEEN")
+#if($column.javaType == 'Date')
+        spec = spec.and(JpaSpecs.betweenIf("${column.javaField}",
+                DateRanges.parseBegin(${className}.getParams().get("begin${attrName}")),
+                DateRanges.parseEnd(${className}.getParams().get("end${attrName}"))));
+#else
+        spec = spec.and(JpaSpecs.betweenIf("${column.javaField}",
+                (${column.javaType}) ${className}.getParams().get("begin${attrName}"),
+                (${column.javaType}) ${className}.getParams().get("end${attrName}")));
+#end
+#end
+#end
+#end
+        return spec;
+    }
+}

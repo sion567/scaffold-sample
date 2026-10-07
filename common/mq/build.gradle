@@ -1,0 +1,15 @@
+// 由 Maven pom.xml 平移生成（依赖坐标与作用域一一对应）
+
+plugins {
+    id 'scaffold.java-conventions'
+}
+
+dependencies {
+    api project(':scaffold-common-core')
+    api project(':scaffold-common-trace')
+    api project(':scaffold-common-redis')
+    api 'org.springframework.kafka:spring-kafka'
+    api 'com.alibaba.fastjson2:fastjson2'
+    api project(':scaffold-api-system')
+    testImplementation project(':scaffold-spring-boot-starter-test')
+}

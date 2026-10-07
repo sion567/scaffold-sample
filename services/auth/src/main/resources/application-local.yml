@@ -1,0 +1,21 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: ${nacos.address:172.26.205.13}:8848
+      config:
+        enabled: false
+    sentinel:
+      enabled: false
+  config:
+    import:
+      - classpath:scaffold-auth-local.yml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+debug: true

@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: scaffold-sample-app
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  cloud:
+    nacos:
+      username: ${NACOS_USER:nacos}
+      password: ${NACOS_PWD:nacos}
+      discovery:
+        server-addr: ${nacos.address:172.26.205.13}:8848
+        # 网关动态路由：声明 gateway-path 即自动生成 /sample/** -> lb://scaffold-sample-app，零网关改动
+        metadata:
+          gateway-path: sample
+      config:
+        server-addr: ${nacos.address:172.26.205.13}:8848
+        group: DEFAULT_GROUP
+        enable-remote-sync-config: false
+  config:
+    file-extension: yaml
+    import:
+      - classpath:scaffold-defaults.yml
+      - optional:nacos:application-${spring.profiles.active}.${spring.config.file-extension}?refreshEnabled=false
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}?refreshEnabled=true
+
+server:
+  port: 9210

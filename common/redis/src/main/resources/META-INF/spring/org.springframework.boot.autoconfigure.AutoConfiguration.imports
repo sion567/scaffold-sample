@@ -1,0 +1,2 @@
+com.scaffold.common.redis.configure.RedisConfig
+com.scaffold.common.redis.service.RedisService

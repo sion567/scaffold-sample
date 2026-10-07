@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: scaffold-auth
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  main:
+    web-application-type: none
+  # 本服务无自有数据库（用户数据经 Dubbo 访问 system 服务）：显式关闭被底座传递进来的
+  # JPA/Flyway/Druid 自动装配（common-core 携带 data-jpa），否则启动期
+  # Flyway/Hibernate/DataSource 初始化要求数据源配置，报 CannotFindDataSourceException。
+  # 注意：exclude 是整值覆盖属性，勿在 profile yml 里再单独设置（会丢掉这里的条目）
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+  cloud:
+    nacos:
+      username: ${NACOS_USER:nacos}
+      password: ${NACOS_PWD:nacos}
+      discovery:
+        server-addr: ${nacos.address:172.26.205.13}:8848
+      config:
+        server-addr: ${nacos.address:172.26.205.13}:8848
+        # 强行指定 Spring 只管 DEFAULT_GROUP 或你自定义的业务组
+        group: DEFAULT_GROUP
+        # 强行关闭对未知 DataId 的全局自动扫描
+        enable-remote-sync-config: false
+  config:
+    file-extension: yaml
+    import:
+      - classpath:scaffold-defaults.yml
+      - optional:nacos:application-${spring.profiles.active}.${spring.config.file-extension}?refreshEnabled=false
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}?refreshEnabled=true
+
+# 无库服务：关闭 DataSource 健康检查（否则 /actuator/health 永远 DOWN）
+management:
+  health:
+    db:
+      enabled: false

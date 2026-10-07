@@ -1,0 +1,2 @@
+com.scaffold.common.redis.lock.LockAutoConfiguration
+com.scaffold.common.redis.cache.TwoLevelCacheAutoConfiguration

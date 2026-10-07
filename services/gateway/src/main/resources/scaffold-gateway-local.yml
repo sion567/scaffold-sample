@@ -1,0 +1,80 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              lowerCaseServiceId: true
+              enabled: true
+          # ── 平台核心静态路由 ─────────────────────────────────────────
+          # 业务服务不在此处登记：服务在 Nacos 注册 metadata 声明 gateway-path
+          # 即可由 DiscoveryMetadataRouteDefinitionLocator 自动生成动态路由
+          # （application.yml scaffold.gateway.dynamic-routes.enabled=true）。
+          routes:
+            - id: scaffold-auth
+              uri: lb://scaffold-auth
+              predicates:
+                - Path=/auth/**
+              filters:
+                # 验证码校验已移至 auth 服务（信封解密后执行，见 SysLoginService#validateCaptcha），
+                # 网关仅负责生成验证码图片（/captchaImage）
+                - StripPrefix=1
+            - id: scaffold-system
+              uri: lb://scaffold-system
+              predicates:
+                - Path=/system/**
+              filters:
+                - StripPrefix=1
+            - id: scaffold-file
+              uri: lb://scaffold-file
+              predicates:
+                - Path=/file/**
+              filters:
+                - StripPrefix=1
+            - id: scaffold-job
+              uri: lb://scaffold-job
+              predicates:
+                - Path=/job/**
+              filters:
+                - StripPrefix=1
+            - id: scaffold-gen
+              uri: lb://scaffold-gen
+              predicates:
+                - Path=/tool/gen/**
+              filters:
+                - StripPrefix=1
+
+security:
+  captcha:
+    enabled: true
+    type: math
+  xss:
+    enabled: true
+    excludeUrls:
+      - /system/notice
+  ignore:
+    whites:
+      - /auth/logout
+      - /auth/login
+      - /auth/register
+      - /auth/gm-key
+      - /captchaImage
+      - /csrf
+      - /*/v3/api-docs
+      - /actuator/**
+
+scaffold:
+  gateway:
+    internal:
+      secret: local-dev-secret
+# ── JWT 国密签名密钥（与 scaffold-auth 同一对；⚠ 仅本地开发使用，生产走 Nacos/环境变量）──
+jwt:
+  sm2:
+    private-key: "224d0cde8d6c8accb917d8d3759698f273495e01945b72584ac89034450b7488"
+    public-key: "04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61"

@@ -1,0 +1,33 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  flyway:
+    enabled: true
+    url: jdbc:h2:file:./data/h2/sample;MODE=Oracle;AUTO_SERVER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS SAMPLE_DB\;SET SCHEMA SAMPLE_DB
+    driver-class-name: org.h2.Driver
+    user: sa
+    password:
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    locations: classpath:db/migration/h2
+    encoding: UTF-8
+    table: flyway_schema_history
+  datasource:
+    dynamic:
+      primary: master
+      strict: false
+      datasource:
+        master:
+          driver-class-name: org.h2.Driver
+          url: jdbc:h2:file:./data/h2/sample;MODE=Oracle;AUTO_SERVER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS SAMPLE_DB\;SET SCHEMA SAMPLE_DB
+          username: sa
+          password:
+
+# JWT SM2 验签密钥：必须与签发方（scaffold-auth）为同一对（dev 联调用，生产经 Nacos/环境变量注入）
+jwt:
+  sm2:
+    private-key: "224d0cde8d6c8accb917d8d3759698f273495e01945b72584ac89034450b7488"
+    public-key: "04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61"

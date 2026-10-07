@@ -1,0 +1,23 @@
+# 消息中心服务（骨架配置；Nacos 配置中心接管后此文件仅保留基础信息）
+server:
+  port: 9212
+
+spring:
+  application:
+    name: scaffold-message
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  cloud:
+    nacos:
+      username: ${NACOS_USER:nacos}
+      password: ${NACOS_PWD:nacos}
+      discovery:
+        server-addr: ${nacos.address:172.26.205.13}:8848
+      config:
+        server-addr: ${nacos.address:172.26.205.13}:8848
+  config:
+    file-extension: yaml
+    import:
+      - classpath:scaffold-defaults.yml
+      - optional:nacos:application-${spring.profiles.active}.${spring.config.file-extension}
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.config.file-extension}

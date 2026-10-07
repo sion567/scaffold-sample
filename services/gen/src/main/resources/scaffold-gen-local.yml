@@ -1,0 +1,58 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+  flyway:
+    enabled: true
+    url: jdbc:h2:file:./data/h2/gen;MODE=Oracle;AUTO_SERVER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS GEN_DB\;SET SCHEMA GEN_DB
+    driver-class-name: org.h2.Driver
+    user: sa
+    password:
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    default-schema: GEN_DB
+    locations: classpath:db/migration/h2
+    encoding: UTF-8
+    table: flyway_schema_history
+    out-of-order: false
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:file:./data/h2/gen;MODE=Oracle;AUTO_SERVER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS GEN_DB\;SET SCHEMA GEN_DB
+    username: sa
+    password:
+
+gen:
+  author: ct
+  packageName: com.scaffold.system
+  autoRemovePre: false
+  tablePrefix: sys_
+  allowOverwrite: false
+
+dubbo:
+  application:
+    name: scaffold-gen
+    logger: slf4j
+    qos-enable: true
+    qos-port: 22223
+    check-serializable: false
+    serialize-check-status: WARN
+  protocol:
+    name: dubbo
+    port: 20883
+    ext-protocol: tri
+    preferred-protocol: tri
+  scan:
+    base-packages: com.scaffold.gen
+  registry:
+    address: nacos://${nacos.address:172.26.205.13}:8848
+    username: ${NACOS_USER:nacos}
+    password: ${NACOS_PWD:nacos}
+    register-mode: instance
+
+# JWT SM2 验签公钥：与签发方（scaffold-auth/gateway）同一对（dev 联调；生产经 Nacos/环境变量注入）。
+# SecurityContextFilter 恢复 LOGIN_USER 时要用它解 token 取 userKey 反查 Redis，缺失则登录态丢失
+jwt:
+  sm2:
+    public-key: "04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61"

@@ -1,0 +1,12 @@
+// 由 Maven pom.xml 平移生成（依赖坐标与作用域一一对应）
+
+plugins {
+    id 'scaffold.java-conventions'
+}
+
+dependencies {
+    api 'org.springframework.boot:spring-boot-starter-test'
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compileOnly 'org.apache.dubbo:dubbo'
+    api 'com.h2database:h2'
+}

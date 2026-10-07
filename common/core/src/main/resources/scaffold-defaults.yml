@@ -1,0 +1,102 @@
+# ============================================================
+# 脚手架通用默认配置
+# 各服务 application.yml 的 spring.config.import 第一条引入：
+#   - classpath:scaffold-defaults.yml
+# 本文件只放"最大公约数"默认值，服务差异与密钥类配置不要写在这里；
+# 服务本地 yml / Nacos 配置优先级更高，可按需覆盖。
+#
+# 注意：本文件不放 Jackson 配置——业务服务的 HTTP 入口是 Dubbo Triple REST，
+# JSON 由 Dubbo 的 protobuf-json 映射层序列化，spring.jackson.* 不生效。
+# ============================================================
+
+spring:
+  lifecycle:
+    # 优雅停机等待窗口（P1-1，配合 server.shutdown 与 K8s preStop sleep）
+    timeout-per-shutdown-phase: 30s
+  task:
+    execution:
+      # P1-4：@Async 线程池有界化（Boot 默认队列无界，有 OOM 风险）；
+      # 拒绝策略与 traceId 透传由 AsyncExecutorConfiguration 注入
+      thread-name-prefix: scaffold-async-
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+      pool:
+        core-size: 8
+        max-size: 32
+        queue-capacity: 2000
+        keep-alive: 60s
+  flyway:
+    # P2-4 Flyway 基线约定（服务本地配置可覆盖）：
+    # - 全项目迁移脚本统一放 classpath:db/migration/h2（各服务本地已显式配置的同值）；
+    # - 多服务共用同一 schema 时必须各自设置 spring.flyway.table: flyway_history_<模块名> 防版本撞号；
+    # - 种子数据一律幂等写法（H2 MODE=Oracle 下用 MERGE INTO），杜绝重复执行报错。
+    baseline-on-migrate: true
+    locations: classpath:db/migration/h2
+  cloud:
+    sentinel:
+      # P1-2：应用侧 Sentinel（dubbo-sentinel 适配器随 security 模块传递）。
+      # 无规则时全部放行仅记录指标，规则经 Sentinel 控制台/Nacos 下发后生效。
+      eager: true
+      transport:
+        dashboard: ${SENTINEL_DASHBOARD:127.0.0.1:8718}
+
+server:
+  # HTTP 优雅停机（scaffold-auth 等 servlet 承载的服务与网关生效；Dubbo tri 端口由下方 dubbo shutdown 兜底）
+  shutdown: graceful
+
+# P1-8：Actuator 收编（依赖随 security 模块传递到全部业务服务）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        # K8s 存活/就绪探针（/actuator/health/liveness、/readiness）
+        enabled: true
+
+dubbo:
+  application:
+    # 优雅下线：停机时等待在途请求完成再注销（P1-1）
+    shutdown:
+      timeout: 15000
+  consumer:
+    # P0-2：显式超时与容错策略。
+    # 原先走默认值：timeout=1s（偏紧）+ failover 重试 2 次 => 非幂等调用存在重复执行风险。
+    # 非幂等写操作必须单独 @DubboReference(retries = 0) 显式标注（auth 侧记录日志、审计上报等已改）。
+    timeout: 3000
+    check: false
+    cluster: failover
+
+scaffold:
+  # 能力开关（starter 化，P2-9）：matchIfMissing=true，注释掉即视为开启；按服务可关
+  ds:
+    rw:
+      # P2-6 写后读一致性窗口：@Master 写成功后 N 秒内的 @Slave 读强制走主库，防从库延迟读到旧值
+      enabled: true
+      read-after-write-seconds: 2
+  cache:
+    # P2-2 两级缓存（Caffeine L1 + Redis L2，Redis pub/sub 跨实例失效广播）
+    enabled: true
+    l1-ttl-seconds: 300
+    l2-ttl-seconds: 1800
+    l1-max-size: 10000
+  lock:
+    # P1-5 分布式锁（LockAutoConfiguration）
+    enabled: true
+  idempotent:
+    # P1-6 接口幂等（IdempotentAutoConfiguration）
+    enabled: true
+  async:
+    # P1-4 @Async 线程池治理（AsyncExecutorConfiguration）
+    enabled: true
+  gateway-sign:
+    # P0-1 网关身份头签名验签（下游侧）：alert=只告警不拦截（灰度起步）→ block=拦截 → off=关闭
+    # 共享密钥由 Nacos/环境变量统一下发（网关与下游一致），
+    # 为空时验签器自动停用；生产环境网关侧缺该密钥将拒绝启动。
+    mode: alert
+    timestamp-window-seconds: 300
+    skip-paths: /actuator/**,/v3/api-docs/**

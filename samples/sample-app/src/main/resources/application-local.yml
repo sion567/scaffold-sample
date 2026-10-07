@@ -1,0 +1,32 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: ${nacos.address:172.26.205.13}:8848
+      config:
+        enabled: false
+    sentinel:
+      enabled: false
+  config:
+    import:
+      - classpath:scaffold-sample-app-local.yml
+
+  autoconfigure:
+    exclude: com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+
+dubbo:
+  # 样例为纯 Web 服务（无 Dubbo Provider），关闭 Dubbo 注册避免与 SC 注册产生双实例
+  registry:
+    register: false
+  application:
+    qos-enable: false
+  protocol:
+    port: 21890
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+

@@ -1,0 +1,37 @@
+file:
+  domain: http://127.0.0.1:9300
+  path: D:/ct/uploadPath
+  prefix: /statics
+
+fdfs:
+  domain: http://127.0.0.1
+  soTimeout: 3000
+  connectTimeout: 2000
+  trackerList: 127.0.0.1:22122
+
+minio:
+  url: http://127.0.0.1:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucketName: test
+
+dubbo:
+  application:
+    name: scaffold-file
+    logger: slf4j
+    qos-enable: true
+    qos-port: 22224
+    check-serializable: false
+    serialize-check-status: WARN
+  protocol:
+    name: dubbo
+    port: 20884
+    ext-protocol: tri
+    preferred-protocol: tri
+  scan:
+    base-packages: com.scaffold.file
+  registry:
+    address: nacos://${nacos.address:172.26.205.13}:8848
+    username: ${NACOS_USER:nacos}
+    password: ${NACOS_PWD:nacos}
+    register-mode: instance

@@ -1,0 +1,23 @@
+// 由 Maven pom.xml 平移生成（依赖坐标与作用域一一对应）
+
+plugins {
+    id 'scaffold.java-conventions'
+}
+
+
+// Dubbo Triple 桩与 protobuf 消息类为签入的生成物（dubbo-maven-plugin 无 Gradle 等价物，
+// proto 为契约源；重新生成方式见 scripts/README.md）
+sourceSets {
+    main {
+        java {
+            srcDir 'src/generated/java'
+        }
+    }
+}
+
+dependencies {
+    api project(':scaffold-common-core')
+    api project(':scaffold-api-system')
+    api 'com.google.protobuf:protobuf-java'
+    api 'org.apache.dubbo:dubbo'
+}

@@ -1,0 +1,12 @@
+// 由 Maven pom.xml 平移生成（依赖坐标与作用域一一对应）
+
+plugins {
+    id 'scaffold.java-conventions'
+}
+
+dependencies {
+    api 'org.apache.dubbo:dubbo-sentinel-spring-boot-starter'
+    api 'org.springframework.boot:spring-boot-starter-actuator'
+    api 'org.apache.dubbo:dubbo-observability-spring-boot-starter'
+    api 'io.micrometer:micrometer-registry-prometheus'
+}

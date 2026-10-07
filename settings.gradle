@@ -1,0 +1,96 @@
+// 仓库与插件版本注册（原 Maven：aliyun 镜像 + 根 pom pluginManagement）
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = uri('https://maven.aliyun.com/repository/public') }
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.PREFER_SETTINGS
+    repositories {
+        // 与 Maven 语义一致：只按 POM 解析，忽略 Gradle 模块元数据（GMM 中第三方自带的
+        // 版本约束会越权覆盖本仓 BOM，例如 mybatis-spring-boot 4.0.1 把 Boot 顶到 4.0.1）
+        maven {
+            url = uri('https://maven.aliyun.com/repository/public')
+            metadataSources { mavenPom(); artifact(); ignoreGradleMetadataRedirection() }
+        }
+        mavenCentral {
+            metadataSources { mavenPom(); artifact(); ignoreGradleMetadataRedirection() }
+        }
+    }
+}
+
+// 模块清单：扁平 include（路径 = 原 artifactId），projectDir 指回 Maven 时代的嵌套目录；
+// 避免 Gradle 9 为嵌套路径生成与叶子共享目录的占位项目（会重复评估同一 build.gradle）
+rootProject.name = "scaffold"
+
+include(':scaffold-bom')
+project(':scaffold-bom').projectDir = file('bom')
+
+include(':scaffold-api-audit')
+project(':scaffold-api-audit').projectDir = file('api/audit-api')
+include(':scaffold-api-file')
+project(':scaffold-api-file').projectDir = file('api/file-api')
+include(':scaffold-api-job')
+project(':scaffold-api-job').projectDir = file('api/job-api')
+include(':scaffold-api-message')
+project(':scaffold-api-message').projectDir = file('api/message-api')
+include(':scaffold-api-system')
+project(':scaffold-api-system').projectDir = file('api/system-api')
+include(':scaffold-audit')
+project(':scaffold-audit').projectDir = file('services/audit')
+include(':scaffold-auth')
+project(':scaffold-auth').projectDir = file('services/auth')
+include(':scaffold-common-core')
+project(':scaffold-common-core').projectDir = file('common/core')
+include(':scaffold-common-datascope')
+project(':scaffold-common-datascope').projectDir = file('common/datascope')
+include(':scaffold-common-datasource')
+project(':scaffold-common-datasource').projectDir = file('common/datasource')
+include(':scaffold-common-log')
+project(':scaffold-common-log').projectDir = file('common/log')
+include(':scaffold-common-mq')
+project(':scaffold-common-mq').projectDir = file('common/mq')
+include(':scaffold-common-redis')
+project(':scaffold-common-redis').projectDir = file('common/redis')
+include(':scaffold-common-security')
+project(':scaffold-common-security').projectDir = file('common/security')
+include(':scaffold-common-sensitive')
+project(':scaffold-common-sensitive').projectDir = file('common/sensitive')
+include(':scaffold-common-trace')
+project(':scaffold-common-trace').projectDir = file('common/trace')
+include(':scaffold-file')
+project(':scaffold-file').projectDir = file('services/file')
+include(':scaffold-gateway')
+project(':scaffold-gateway').projectDir = file('services/gateway')
+include(':scaffold-gen')
+project(':scaffold-gen').projectDir = file('services/gen')
+include(':scaffold-job')
+project(':scaffold-job').projectDir = file('services/job')
+include(':scaffold-message')
+project(':scaffold-message').projectDir = file('services/message')
+include(':scaffold-sample-app')
+project(':scaffold-sample-app').projectDir = file('samples/sample-app')
+include(':scaffold-spring-boot-starter-area')
+project(':scaffold-spring-boot-starter-area').projectDir = file('starters/area')
+include(':scaffold-spring-boot-starter-cache')
+project(':scaffold-spring-boot-starter-cache').projectDir = file('starters/cache')
+include(':scaffold-spring-boot-starter-flow')
+project(':scaffold-spring-boot-starter-flow').projectDir = file('starters/flow')
+include(':scaffold-spring-boot-starter-gateway-sign')
+project(':scaffold-spring-boot-starter-gateway-sign').projectDir = file('starters/gateway-sign')
+include(':scaffold-spring-boot-starter-gm')
+project(':scaffold-spring-boot-starter-gm').projectDir = file('starters/gm')
+include(':scaffold-spring-boot-starter-idempotent')
+project(':scaffold-spring-boot-starter-idempotent').projectDir = file('starters/idempotent')
+include(':scaffold-spring-boot-starter-job')
+project(':scaffold-spring-boot-starter-job').projectDir = file('starters/job')
+include(':scaffold-spring-boot-starter-monitor')
+project(':scaffold-spring-boot-starter-monitor').projectDir = file('starters/monitor')
+include(':scaffold-spring-boot-starter-rw')
+project(':scaffold-spring-boot-starter-rw').projectDir = file('starters/rw')
+include(':scaffold-spring-boot-starter-test')
+project(':scaffold-spring-boot-starter-test').projectDir = file('starters/test')
+include(':scaffold-system')
+project(':scaffold-system').projectDir = file('services/system')

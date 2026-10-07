@@ -1,0 +1,12 @@
+// 由 Maven pom.xml 平移生成（依赖坐标与作用域一一对应）
+
+plugins {
+    id 'scaffold.java-conventions'
+}
+
+dependencies {
+    api 'com.alibaba:druid-spring-boot-3-starter'
+    api 'com.baomidou:dynamic-datasource-spring-boot3-starter'
+    api project(':scaffold-api-system')
+    api project(':scaffold-spring-boot-starter-rw')
+}

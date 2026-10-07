@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package com.scaffold.audit.api;
+
+option java_package = "com.scaffold.audit.api.proto";
+option java_multiple_files = true;
+option java_outer_classname = "RemoteLogProto";
+
+import "remote_audit.proto";
+
+// 审计日志写入 RPC（IDL 模式，Triple/protobuf）：scaffold-auth / 各服务(scaffold-common-log) -> scaffold-audit
+// scaffold-audit 是审计域权威模块：操作日志写 audit_oper_log，登录日志写 audit_logininfor。
+// 约定同 remote_audit.proto：code/msg 对齐 R<T>，null <-> 默认值，Date <-> int64 毫秒。
+// 审计日志防篡改：仅追加，不提供修改/删除接口。
+service RemoteLogService {
+
+  // 保存操作日志
+  rpc SaveLog(SaveLogRequest) returns (BoolResponse);
+
+  // 保存登录日志
+  rpc SaveLogininfor(SaveLogininforRequest) returns (BoolResponse);
+}
+
+message SaveLogRequest {
+  SysOperLogProto oper_log = 1;
+  string source = 2;
+}
+
+message SaveLogininforRequest {
+  SysLogininforProto logininfor = 1;
+  string source = 2;
+}
+
+// 对齐 com.scaffold.system.api.domain.SysOperLog（含 BaseEntity 审计字段）
+message SysOperLogProto {
+  int64 oper_id = 1;
+  string title = 2;
+  int32 business_type = 3;
+  repeated int32 business_types = 4;
+  string method = 5;
+  string request_method = 6;
+  int32 operator_type = 7;
+  string oper_name = 8;
+  string dept_name = 9;
+  string oper_url = 10;
+  string oper_ip = 11;
+  string oper_param = 12;
+  string json_result = 13;
+  int32 status = 14;
+  string error_msg = 15;
+  int64 oper_time = 16;
+  int64 cost_time = 17;
+  int64 user_id = 18;
+  string session_id = 19;
+  string biz_key = 20;
+  string biz_type = 21;
+  string event_type = 22;
+  int32 result_code = 23;
+  string request_ip = 24;
+  string before_value = 25;
+  string after_value = 26;
+  // ---- BaseEntity ----
+  string create_by = 27;
+  int64 create_time = 28;
+  string update_by = 29;
+  int64 update_time = 30;
+  string remark = 31;
+  int32 version = 32;
+}
+
+// 对齐 com.scaffold.system.api.domain.SysLogininfor（含 BaseEntity 审计字段）
+message SysLogininforProto {
+  int64 info_id = 1;
+  string user_name = 2;
+  string status = 3;
+  string ipaddr = 4;
+  string msg = 5;
+  int64 access_time = 6;
+  // ---- BaseEntity ----
+  string create_by = 7;
+  int64 create_time = 8;
+  string update_by = 9;
+  int64 update_time = 10;
+  string remark = 11;
+  int32 version = 12;
+}

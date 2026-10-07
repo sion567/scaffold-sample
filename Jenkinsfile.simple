@@ -1,0 +1,104 @@
+// ============================================================
+// 简化版 Jenkinsfile - 两段式：本机 mvn 打包 → rsync/ssh 推送 → 远程 docker-compose up
+// 参考 ch_tourist/Jenkinsfile.simple，去掉前端构建与 ct-visual/ct-monitor 等已失效引用。
+//
+// 本仓库不含前端（ct-ui 同款 Vue3 前端另仓），只构建 6 个后端平台服务。
+// 服务清单参数化在 env.SERVICES，新增/删减服务只改这一行。
+//
+// 使用前需要准备：
+//   1. Jenkins 凭据中添加目标主机的 SSH 私钥（下方 SSH_CREDENTIALS 指定的 ID）；
+//   2. 目标主机已安装 docker / docker-compose；
+//   3. 目标主机 ${REMOTE_DIR}/docker/.env 已按 docker/.env.example 配置好
+//      （REGISTRY/TAG/JWT_SECRET 等；.env 不入 git，需手工或单独通道下发）；
+//   4. 若镜像推送远端仓库，目标主机需已 docker login。
+// ============================================================
+pipeline {
+    agent any
+
+    environment {
+        // ----- 需按团队环境修改的参数 -----
+        REGISTRY        = ''                                  // 镜像仓库前缀，必须以 / 结尾；置空用本地镜像
+        SSH_CREDENTIALS = 'jenkins-server-key'                // Jenkins SSH 私钥凭据 ID
+        REMOTE_USER     = 'jenkins'                           // 目标主机 SSH 用户
+        REMOTE_HOST     = '192.168.40.237'                    // 目标部署主机
+        REMOTE_DIR      = '/opt/scaffold-sample'              // 目标主机上的工程目录
+        // 服务清单：目录 = services/<s>，构件 = scaffold-<s>.jar，镜像 = scaffold-<s>
+        SERVICES        = 'gateway auth system file job gen'
+    }
+
+    stages {
+        stage('清理工作区') {
+            steps {
+                deleteDir()
+            }
+        }
+
+        stage('拉取代码') {
+            steps {
+                checkout scm
+            }
+        }
+
+        // ----- 第一段：Maven 打包 -----
+        stage('Maven 构建') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        // ----- 按 SERVICES 清单拷贝 jar 到各服务 docker/<s>/jar/ -----
+        stage('准备构建产物') {
+            steps {
+                sh '''
+                    set -e
+                    for s in $SERVICES; do
+                        mkdir -p "docker/$s/jar"
+                        cp "services/$s/target/scaffold-$s.jar" "docker/$s/jar/"
+                        echo "copied services/$s/target/scaffold-$s.jar -> docker/$s/jar/"
+                    done
+                '''
+            }
+        }
+
+        // ----- 第二段：同步到目标服务器并远程拉起 -----
+        stage('同步到服务器') {
+            steps {
+                sshagent(credentials: [env.SSH_CREDENTIALS]) {
+                    sh '''
+                        rsync -avz --delete \
+                            --exclude '.git' \
+                            --exclude 'target/' \
+                            --exclude 'logs/' \
+                            --exclude 'docker/.env' \
+                            -e "ssh -o StrictHostKeyChecking=no" \
+                            ./ ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
+                    '''
+                }
+            }
+        }
+
+        stage('执行部署') {
+            steps {
+                sshagent(credentials: [env.SSH_CREDENTIALS]) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} "
+                            cd ${REMOTE_DIR}/docker && \
+                            docker-compose --env-file .env pull && \
+                            docker-compose --env-file .env up -d --remove-orphans && \
+                            docker image prune -f
+                        "
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '构建部署成功！'
+        }
+        failure {
+            echo '构建失败，请检查日志。'
+        }
+    }
+}

@@ -1,0 +1,5 @@
+com.scaffold.common.core.utils.JwtUtils
+com.scaffold.common.core.utils.SpringUtils
+com.scaffold.common.core.config.AsyncExecutorConfiguration
+com.scaffold.common.core.config.SnowflakeIdGeneratorConfiguration
+com.scaffold.common.core.jpa.JpaAuditingAutoConfiguration

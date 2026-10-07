@@ -1,0 +1,180 @@
+# ============================================================
+# scaffold 微服务脚手架 —— 单机 docker-compose 部署
+#
+# 说明：
+# - 所有内存 / JVM 开关 / 镜像仓库 全部走 .env（参考 ch_tourist/deploy/dev 风格）
+#   cp docker/.env.example docker/.env 后按环境修改
+# - 镜像名：${REGISTRY}scaffold-xxx:${TAG}；REGISTRY 置空则用本地镜像
+# - 中间件外置约定：
+#     MinIO（对象存储）、Kafka、Sentinel Dashboard、
+#     生产级 Nacos 集群/MySQL 存储 —— 默认均运行在宿主机或外部 K8S，
+#     通过 NACOS_ADDRESS / SPRING_DATA_REDIS_HOST 等环境变量指向外部地址即可，
+#     无需在本文件容器化；下方的 nacos/redis 仅供单机快速起步。
+# - 服务 HTTP 端口沿用原型：gateway 28080 / auth 9200 / system 9201 /
+#   gen 9202 / job 9203 / file 9300；业务服务间走 Dubbo Triple（2088x），
+#   经 Nacos 注册发现，宿主机无需逐一映射端口。
+# ============================================================
+
+services:
+
+  # ========== 中间件（单机起步用，生产请外置并注释掉本段） ==========
+  nacos:
+    image: ${NACOS_IMAGE:-nacos/nacos-server:v2.3.2}
+    container_name: scaffold-nacos
+    restart: unless-stopped
+    environment:
+      MODE: standalone
+      NACOS_AUTH_ENABLE: "false"
+      TZ: Asia/Shanghai
+      JVM_XMS: 256m
+      JVM_XMX: 512m
+    ports:
+      - "${PORT_NACOS:-8848}:8848"
+      - "9848:9848"
+    volumes:
+      - ./logs/nacos:/home/nacos/logs
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8848/nacos/v1/console/health/readiness"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7-alpine}
+    container_name: scaffold-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./logs/redis-data:/data
+    # Redis 只在 compose 网络内使用，不映射宿主机端口；需要调试时放开：
+    # ports:
+    #   - "6379:6379"
+
+  # ========== 平台服务（镜像由 docker/<svc>/dockerfile 构建） ==========
+  gateway:
+    image: ${REGISTRY}scaffold-gateway:${TAG:-dev}
+    container_name: scaffold-gateway
+    mem_limit: ${MEM_BASE:-256m}
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      # JwtUtils（SM2withSM3 签名 JWT）经 -D 系统属性注入密钥，属性名精确匹配 @Value 占位符；
+      # gateway/auth 为签发侧需私钥+公钥，默认值为 dev 联调密钥对（与 services/*-local.yml 一致），生产经 .env 覆盖
+      JAVA_OPTS: ${JAVA_OPTS_BASE:--Xms64m -Xmx192m -XX:+UseG1GC} -Djwt.sm2.private-key=${JWT_SM2_PRIVATE_KEY:-224d0cde8d6c8accb917d8d3759698f273495e01945b72584ac89034450b7488} -Djwt.sm2.public-key=${JWT_SM2_PUBLIC_KEY:-04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      # 覆盖 yml 中 ${nacos.address:...} 占位符（Spring 宽松绑定）
+      NACOS_ADDRESS: nacos
+      NACOS_USER: ${NACOS_USER:-nacos}
+      NACOS_PWD: ${NACOS_PWD:-nacos}
+    ports:
+      - "${PORT_GATEWAY:-28080}:28080"
+    volumes:
+      - ./logs/gateway:/home/scaffold/logs
+    depends_on:
+      nacos:
+        condition: service_healthy
+
+  auth:
+    image: ${REGISTRY}scaffold-auth:${TAG:-dev}
+    container_name: scaffold-auth
+    mem_limit: ${MEM_BASE:-256m}
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      # 签发侧（同 gateway）：私钥+公钥
+      JAVA_OPTS: ${JAVA_OPTS_BASE:--Xms64m -Xmx192m -XX:+UseG1GC} -Djwt.sm2.private-key=${JWT_SM2_PRIVATE_KEY:-224d0cde8d6c8accb917d8d3759698f273495e01945b72584ac89034450b7488} -Djwt.sm2.public-key=${JWT_SM2_PUBLIC_KEY:-04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      NACOS_ADDRESS: nacos
+      NACOS_USER: ${NACOS_USER:-nacos}
+      NACOS_PWD: ${NACOS_PWD:-nacos}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+    volumes:
+      - ./logs/auth:/home/scaffold/logs
+    depends_on:
+      nacos:
+        condition: service_healthy
+
+  system:
+    image: ${REGISTRY}scaffold-system:${TAG:-dev}
+    container_name: scaffold-system
+    mem_limit: ${MEM_BASE:-256m}
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      # 下游验签侧：仅需公钥（与签发方同一对），缺失则登录态无法解析（见 JwtUtils 启动自检日志）
+      JAVA_OPTS: ${JAVA_OPTS_BASE:--Xms64m -Xmx192m -XX:+UseG1GC} -Djwt.sm2.public-key=${JWT_SM2_PUBLIC_KEY:-04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      NACOS_ADDRESS: nacos
+      NACOS_USER: ${NACOS_USER:-nacos}
+      NACOS_PWD: ${NACOS_PWD:-nacos}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+    volumes:
+      - ./logs/system:/home/scaffold/logs
+    depends_on:
+      nacos:
+        condition: service_healthy
+
+  file:
+    image: ${REGISTRY}scaffold-file:${TAG:-dev}
+    container_name: scaffold-file
+    mem_limit: ${MEM_BASE:-256m}
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      JAVA_OPTS: ${JAVA_OPTS_BASE:--Xms64m -Xmx192m -XX:+UseG1GC} -Djwt.sm2.public-key=${JWT_SM2_PUBLIC_KEY:-04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      NACOS_ADDRESS: nacos
+      NACOS_USER: ${NACOS_USER:-nacos}
+      NACOS_PWD: ${NACOS_PWD:-nacos}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+    volumes:
+      - ./logs/file:/home/scaffold/logs
+      - ./uploadPath:/home/scaffold/uploadPath
+    depends_on:
+      nacos:
+        condition: service_healthy
+
+  job:
+    image: ${REGISTRY}scaffold-job:${TAG:-dev}
+    container_name: scaffold-job
+    mem_limit: ${MEM_BASE:-256m}
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      JAVA_OPTS: ${JAVA_OPTS_BASE:--Xms64m -Xmx192m -XX:+UseG1GC} -Djwt.sm2.public-key=${JWT_SM2_PUBLIC_KEY:-04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      NACOS_ADDRESS: nacos
+      NACOS_USER: ${NACOS_USER:-nacos}
+      NACOS_PWD: ${NACOS_PWD:-nacos}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+    volumes:
+      - ./logs/job:/home/scaffold/logs
+    depends_on:
+      nacos:
+        condition: service_healthy
+
+  gen:
+    image: ${REGISTRY}scaffold-gen:${TAG:-dev}
+    container_name: scaffold-gen
+    mem_limit: ${MEM_BASE:-256m}
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      JAVA_OPTS: ${JAVA_OPTS_BASE:--Xms64m -Xmx192m -XX:+UseG1GC} -Djwt.sm2.public-key=${JWT_SM2_PUBLIC_KEY:-04aa796e22771f2a2e7d6ddeacdd07d9e0a1bad34949344cc79319c508d08838f1b67fd9d33fc452527a2b4b4f8bf7a57b0d3141434e49d0e8c42a21e1e1401e61}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      NACOS_ADDRESS: nacos
+      NACOS_USER: ${NACOS_USER:-nacos}
+      NACOS_PWD: ${NACOS_PWD:-nacos}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+    volumes:
+      - ./logs/gen:/home/scaffold/logs
+    depends_on:
+      nacos:
+        condition: service_healthy

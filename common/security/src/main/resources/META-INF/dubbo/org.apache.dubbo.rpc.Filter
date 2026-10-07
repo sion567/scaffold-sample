@@ -1,0 +1,3 @@
+dubboRequestInterceptor=com.scaffold.common.security.dubbo.DubboRequestInterceptor
+securityContextFilter=com.scaffold.common.security.dubbo.SecurityContextFilter
+tripleExceptionFilter=com.scaffold.common.security.dubbo.TripleExceptionFilter

@@ -1,0 +1,1 @@
+gatewaySignVerifyFilter=com.scaffold.common.security.dubbo.GatewaySignVerifyFilter

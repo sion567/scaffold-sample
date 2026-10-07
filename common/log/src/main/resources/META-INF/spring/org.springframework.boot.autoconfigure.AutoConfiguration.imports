@@ -1,0 +1,5 @@
+com.scaffold.common.log.persist.LogPersisterAutoConfiguration
+com.scaffold.common.log.service.AsyncLogService
+com.scaffold.common.log.service.AsyncTraceLogService
+com.scaffold.common.log.aspect.LogAspect
+com.scaffold.common.log.aspect.TraceLogAspect

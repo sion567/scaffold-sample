@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<ruleset name="scaffold-pmd-ruleset"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <!-- ct 项目 PMD 规则集：阿里 P3C 全部 10 个规则集，排除两个在 PMD 6.55 下
+         因内部 XPath 使用废弃属性而持续抛 RuntimeException 的 P3C 规则
+         （StringConcatRule：AdditiveExpression/@Image；
+           PojoMustOverrideToStringRule：MethodDeclarator/@Image。
+           异常导致规则对该文件的分析中断，结果本就不可靠。
+           待 P3C 适配 PMD 7 后移除排除项恢复全集） -->
+    <description>scaffold P3C rules, excludes 2 P3C rules broken under PMD 6.55 deprecated XPath attributes</description>
+
+    <rule ref="rulesets/java/ali-comment.xml"/>
+    <rule ref="rulesets/java/ali-concurrent.xml"/>
+    <rule ref="rulesets/java/ali-constant.xml"/>
+    <rule ref="rulesets/java/ali-exception.xml"/>
+    <rule ref="rulesets/java/ali-flowcontrol.xml"/>
+    <rule ref="rulesets/java/ali-naming.xml"/>
+    <rule ref="rulesets/java/ali-oop.xml">
+        <exclude name="StringConcatRule"/>
+        <exclude name="PojoMustOverrideToStringRule"/>
+    </rule>
+    <rule ref="rulesets/java/ali-orm.xml"/>
+    <rule ref="rulesets/java/ali-other.xml"/>
+    <rule ref="rulesets/java/ali-set.xml"/>
+</ruleset>

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!-- Checkstyle 规则集：只管"规范"（命名/导入/体量/复杂度）。
+     分工约定：格式类规则归 Spotless（能自动修）、注释规则归 P3C（阿里手册）、
+     缺陷规则归 SpotBugs/PMD，本文件刻意不收这三类，避免重复报警 -->
+<module name="Checker">
+    <property name="charset" value="UTF-8"/>
+    <property name="severity" value="error"/>
+
+    <module name="TreeWalker">
+        <!-- 一个 .java 只放一个顶层类；文件名与顶层类一致 -->
+        <module name="OuterTypeFilename"/>
+        <module name="OneTopLevelClass"/>
+        <!-- 命名规范（对应《阿里巴巴 Java 开发手册》命名风格【强制】条款） -->
+        <module name="TypeName"/>
+        <module name="MethodName"/>
+        <module name="MemberName"/>
+        <module name="ParameterName"/>
+        <module name="LocalVariableName"/>
+        <module name="ConstantName"/>
+        <module name="PackageName"/>
+
+        <!-- 导入规范：禁止 import *；禁止引用 sun.* 内部 API -->
+        <module name="AvoidStarImport"/>
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="sun, sun.misc"/>
+        </module>
+
+        <!-- 体量/复杂度看板：超阈值提示重构，起步仅报告不阻断 -->
+        <module name="MethodLength">
+            <property name="max" value="150"/>
+        </module>
+        <module name="ParameterNumber">
+            <property name="max" value="10"/>
+        </module>
+        <module name="CyclomaticComplexity">
+            <property name="max" value="20"/>
+        </module>
+
+        <!-- 杂项：长整型字面量用大写 L；魔法值需提取常量（阿里手册【强制】） -->
+        <module name="UpperEll"/>
+        <module name="MagicNumber">
+            <property name="ignoreHashCodeMethod" value="true"/>
+        </module>
+    </module>
+</module>

@@ -1,0 +1,24 @@
+# 全仓统一 UTF-8（与根 POM project.build.sourceEncoding 一致）
+# 表示这是项目最顶层的配置，不再向上查找
+root = true
+
+# 对所有文件生效：与 Spotless（trimTrailingWhitespace/endWithNewline）约定一致
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Markdown 文件例外，保留行尾空格（因为两个空格代表换行）
+[*.md]
+trim_trailing_whitespace = false
+
+# Windows 批处理要求 CRLF，否则可能无法执行
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# YAML 惯例 2 空格缩进（.gitlab-ci.yml、application*.yml 等）
+[*.{yml,yaml}]
+indent_size = 2
