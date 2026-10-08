@@ -28,6 +28,7 @@ CREATE TABLE gen_table (
     remark VARCHAR(500),
     CONSTRAINT pk_gen_table PRIMARY KEY (table_id)
 );
+COMMENT ON TABLE gen_table IS '代码生成业务表';
 COMMENT ON COLUMN gen_table.table_id IS '编号';
 COMMENT ON COLUMN gen_table.table_name IS '表名称';
 COMMENT ON COLUMN gen_table.table_comment IS '表描述';
@@ -78,6 +79,7 @@ CREATE TABLE gen_table_column (
     update_time TIMESTAMP,
     CONSTRAINT pk_gen_table_column PRIMARY KEY (column_id)
 );
+COMMENT ON TABLE gen_table_column IS '代码生成业务表字段';
 COMMENT ON COLUMN gen_table_column.column_id IS '编号';
 COMMENT ON COLUMN gen_table_column.table_id IS '归属表编号';
 COMMENT ON COLUMN gen_table_column.column_name IS '列名称';

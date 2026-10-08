@@ -311,10 +311,15 @@ const data = reactive<{
 
 const { queryParams, form, rules } = toRefs(data)
 
-/** 查询角色列表 */
+/** 查询角色列表（时间范围走顶层 beginTime/endTime：后端过滤字段已摊平为 @RequestParam，
+    原型 params[beginTime] 的 ModelAttribute 绑定在 Triple REST 下不可用） */
 function getList() {
   loading.value = true
-  listRole(proxy.addDateRange(queryParams.value, dateRange.value)).then(response => {
+  listRole({
+    ...queryParams.value,
+    beginTime: dateRange.value?.[0],
+    endTime: dateRange.value?.[1]
+  }).then(response => {
     roleList.value = response.rows
     total.value = response.total
     loading.value = false

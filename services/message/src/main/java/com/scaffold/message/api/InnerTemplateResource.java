@@ -1,6 +1,5 @@
 package com.scaffold.message.api;
 
-import org.springframework.web.bind.annotation.ModelAttribute;
 import com.scaffold.common.core.web.domain.AjaxResult;
 import com.scaffold.common.core.web.page.TableDataInfo;
 import com.scaffold.message.domain.MsgInnerTemplate;
@@ -20,8 +19,16 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @RequestMapping("/message/inner/template")
 public interface InnerTemplateResource {
+  /**
+   * 模板列表。过滤字段摊平为 @RequestParam：Dubbo Triple REST 的
+   * ModelAttributeArgumentResolver 会读取注解的 required 属性，而 Spring
+   * {@code @ModelAttribute} 无该属性，显式标注必 500（本服务 HTTP 由 Triple 承载）。
+   */
   @GetMapping("/list")
-  TableDataInfo list(@ModelAttribute MsgInnerTemplate query);
+  TableDataInfo list(@RequestParam(value = "templateCode", required = false) String templateCode,
+                     @RequestParam(value = "templateName", required = false) String templateName,
+                     @RequestParam(value = "category", required = false) String category,
+                     @RequestParam(value = "status", required = false) String status);
 
   @GetMapping("/{id}")
   AjaxResult getInfo(@PathVariable("id") Long id);

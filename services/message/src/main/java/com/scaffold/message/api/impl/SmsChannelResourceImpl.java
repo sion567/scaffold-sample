@@ -30,7 +30,11 @@ public class SmsChannelResourceImpl extends BaseController implements SmsChannel
 
   @Override
   @RequiresPermissions("message:smsChannel:list")
-  public TableDataInfo list(MsgSmsChannel query) {
+  public TableDataInfo list(String channelName, String channelType, String status) {
+    MsgSmsChannel query = new MsgSmsChannel();
+    query.setChannelName(channelName);
+    query.setChannelType(channelType);
+    query.setStatus(status);
     return channelService.queryPage(query, TableSupport.buildPageRequest());
   }
 

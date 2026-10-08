@@ -27,10 +27,10 @@ export interface OnlineUserQuery extends PageQuery {
   userName?: string
 }
 
-// 查询在线用户列表
+// 查询在线用户列表（网关 /system/** 路由 → system 服务 /online/list）
 export function list(query: OnlineUserQuery): Promise<TableDataInfo<SysUserOnline>> {
   return request({
-    url: '/monitor/online/list',
+    url: '/system/online/list',
     method: 'get',
     params: query
   })
@@ -39,7 +39,7 @@ export function list(query: OnlineUserQuery): Promise<TableDataInfo<SysUserOnlin
 // 强退用户
 export function forceLogout(tokenId: string): Promise<AjaxResult<null>> {
   return request({
-    url: '/monitor/online/' + tokenId,
+    url: '/system/online/' + tokenId,
     method: 'delete'
   })
 }

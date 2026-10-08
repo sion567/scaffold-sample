@@ -30,7 +30,12 @@ public class InnerTemplateResourceImpl extends BaseController implements InnerTe
 
   @Override
   @RequiresPermissions("message:innerTemplate:list")
-  public TableDataInfo list(MsgInnerTemplate query) {
+  public TableDataInfo list(String templateCode, String templateName, String category, String status) {
+    MsgInnerTemplate query = new MsgInnerTemplate();
+    query.setTemplateCode(templateCode);
+    query.setTemplateName(templateName);
+    query.setCategory(category);
+    query.setStatus(status);
     return templateService.queryPage(query, TableSupport.buildPageRequest());
   }
 

@@ -17,6 +17,12 @@ declare module 'axios' {
   }
 }
 
+// 调用方通过 headers 传入的自定义开关（与 isToken/repeatSubmit 同一约定）：
+// silent —— 失败不弹全局错误提示、仅 reject，供允许优雅降级的场景（如首页统计）使用
+function isSilent(config?: InternalAxiosRequestConfig | null): boolean {
+  return config?.headers?.['silent'] === true || config?.headers?.['silent'] === 'true'
+}
+
 let downloadLoadingInstance: ReturnType<typeof ElLoading.service> | undefined
 // 是否显示重新登录
 export const isRelogin = { show: false }
@@ -126,10 +132,14 @@ service.interceptors.response.use(async res => {
     }
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
     } else if (code === 500) {
-      ElMessage({ message: msg, type: 'error' })
+      if (!isSilent(res.config)) {
+        ElMessage({ message: msg, type: 'error' })
+      }
       return Promise.reject(new Error(msg))
     } else if (code === 601) {
-      ElMessage({ message: msg, type: 'warning' })
+      if (!isSilent(res.config)) {
+        ElMessage({ message: msg, type: 'warning' })
+      }
       return Promise.reject(new Error(msg))
     } else if (code === 40006 || code === 40003) {
       // 会话签名钥未初始化/已失效：重新签发后用原始报文（__gmOrig）重放一次，仍失败才报错
@@ -152,7 +162,9 @@ service.interceptors.response.use(async res => {
       ElNotification.error({ title: msg })
       return Promise.reject('error')
     } else if (code !== 200) {
-      ElNotification.error({ title: msg })
+      if (!isSilent(res.config)) {
+        ElNotification.error({ title: msg })
+      }
       return Promise.reject('error')
     } else {
       return  Promise.resolve(res.data)
@@ -173,7 +185,9 @@ service.interceptors.response.use(async res => {
     } else if (message.includes("Request failed with status code")) {
       message = "系统接口" + message.slice(-3) + "异常"
     }
-    ElMessage({ message: message, type: 'error', duration: 5 * 1000 })
+    if (!isSilent(error.config)) {
+      ElMessage({ message: message, type: 'error', duration: 5 * 1000 })
+    }
     return Promise.reject(error)
   }
 )

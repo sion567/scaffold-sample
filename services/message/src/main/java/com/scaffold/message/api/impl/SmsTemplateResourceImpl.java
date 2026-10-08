@@ -30,7 +30,13 @@ public class SmsTemplateResourceImpl extends BaseController implements SmsTempla
 
   @Override
   @RequiresPermissions("message:smsTemplate:list")
-  public TableDataInfo list(MsgSmsTemplate query) {
+  public TableDataInfo list(String templateCode, String templateName, Long channelId, String category, String status) {
+    MsgSmsTemplate query = new MsgSmsTemplate();
+    query.setTemplateCode(templateCode);
+    query.setTemplateName(templateName);
+    query.setChannelId(channelId);
+    query.setCategory(category);
+    query.setStatus(status);
     return templateService.queryPage(query, TableSupport.buildPageRequest());
   }
 

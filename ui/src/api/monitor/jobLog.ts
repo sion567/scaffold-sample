@@ -39,10 +39,10 @@ export interface SysJobLogQuery extends PageQuery {
   params?: Record<string, unknown>
 }
 
-// 查询调度日志列表
+// 查询调度日志列表（网关 /job/** 路由 StripPrefix 后 → job 服务 /job/log/list）
 export function listJobLog(query: SysJobLogQuery): Promise<TableDataInfo<SysJobLog>> {
   return request({
-    url: '/monitor/jobLog/list',
+    url: '/job/job/log/list',
     method: 'get',
     params: query
   })
@@ -51,7 +51,7 @@ export function listJobLog(query: SysJobLogQuery): Promise<TableDataInfo<SysJobL
 // 删除调度日志
 export function delJobLog(jobLogId: number | string | number[]): Promise<AjaxResult<null>> {
   return request({
-    url: '/monitor/jobLog/' + jobLogId,
+    url: '/job/job/log/' + jobLogId,
     method: 'delete'
   })
 }
@@ -59,7 +59,7 @@ export function delJobLog(jobLogId: number | string | number[]): Promise<AjaxRes
 // 清空调度日志
 export function cleanJobLog(): Promise<AjaxResult<null>> {
   return request({
-    url: '/monitor/jobLog/clean',
+    url: '/job/job/log/clean',
     method: 'delete'
   })
 }

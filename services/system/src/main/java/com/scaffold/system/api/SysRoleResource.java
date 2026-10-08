@@ -1,6 +1,5 @@
 package com.scaffold.system.api;
 
-import org.springframework.web.bind.annotation.ModelAttribute;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,13 +27,21 @@ public interface SysRoleResource
 {
     /**
      * 获取角色列表
+     *
+     * <p>过滤字段摊平为 @RequestParam：Dubbo Triple REST 的 ModelAttributeArgumentResolver
+     * 会读取注解的 required 属性，而 Spring {@code @ModelAttribute} 无该属性，显式标注必 500
+     * （本服务无内嵌 Web 容器，HTTP 由 Triple REST 承载）。</p>
      */
     @GetMapping("/list")
     TableDataInfo list(@RequestParam(value = "pageNum", required = false) Integer pageNum,
                        @RequestParam(value = "pageSize", required = false) Integer pageSize,
                        @RequestParam(value = "orderByColumn", required = false) String orderByColumn,
                        @RequestParam(value = "isAsc", required = false) String isAsc,
-                       @ModelAttribute SysRole role);
+                       @RequestParam(value = "roleName", required = false) String roleName,
+                       @RequestParam(value = "roleKey", required = false) String roleKey,
+                       @RequestParam(value = "status", required = false) String status,
+                       @RequestParam(value = "beginTime", required = false) String beginTime,
+                       @RequestParam(value = "endTime", required = false) String endTime);
 
     /**
      * 导出角色列表
@@ -86,24 +93,28 @@ public interface SysRoleResource
     AjaxResult optionselect();
 
     /**
-     * 获取已分配用户列表
+     * 获取已分配用户列表（过滤字段摊平为 @RequestParam，原因见 {@link #list}）
      */
     @GetMapping("/authUser/allocatedList")
     TableDataInfo allocatedList(@RequestParam(value = "pageNum", required = false) Integer pageNum,
                                 @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                 @RequestParam(value = "orderByColumn", required = false) String orderByColumn,
                                 @RequestParam(value = "isAsc", required = false) String isAsc,
-                                @ModelAttribute SysUser user);
+                                @RequestParam(value = "roleId", required = false) Long roleId,
+                                @RequestParam(value = "userName", required = false) String userName,
+                                @RequestParam(value = "phonenumber", required = false) String phonenumber);
 
     /**
-     * 获取未分配用户列表
+     * 获取未分配用户列表（过滤字段摊平为 @RequestParam，原因见 {@link #list}）
      */
     @GetMapping("/authUser/unallocatedList")
     TableDataInfo unallocatedList(@RequestParam(value = "pageNum", required = false) Integer pageNum,
                                   @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                   @RequestParam(value = "orderByColumn", required = false) String orderByColumn,
                                   @RequestParam(value = "isAsc", required = false) String isAsc,
-                                  @ModelAttribute SysUser user);
+                                  @RequestParam(value = "roleId", required = false) Long roleId,
+                                  @RequestParam(value = "userName", required = false) String userName,
+                                  @RequestParam(value = "phonenumber", required = false) String phonenumber);
 
     /**
      * 取消授权用户

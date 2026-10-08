@@ -35,6 +35,7 @@ CREATE TABLE SYS_DEPT (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_SYS_DEPT PRIMARY KEY (DEPT_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'部门表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_DEPT';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'部门id', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_DEPT', @level2type=N'COLUMN', @level2name=N'DEPT_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'父部门id', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_DEPT', @level2type=N'COLUMN', @level2name=N'PARENT_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'祖级列表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_DEPT', @level2type=N'COLUMN', @level2name=N'ANCESTORS';
@@ -93,6 +94,7 @@ CREATE TABLE SYS_USER (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_SYS_USER PRIMARY KEY (USER_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'用户信息表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'用户ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER', @level2type=N'COLUMN', @level2name=N'USER_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'部门ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER', @level2type=N'COLUMN', @level2name=N'DEPT_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'用户账号', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER', @level2type=N'COLUMN', @level2name=N'USER_NAME';
@@ -140,6 +142,7 @@ CREATE TABLE SYS_POST (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_SYS_POST PRIMARY KEY (POST_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'岗位信息表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_POST';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'岗位ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_POST', @level2type=N'COLUMN', @level2name=N'POST_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'岗位编码', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_POST', @level2type=N'COLUMN', @level2name=N'POST_CODE';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'岗位名称', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_POST', @level2type=N'COLUMN', @level2name=N'POST_NAME';
@@ -183,6 +186,7 @@ CREATE TABLE SYS_ROLE (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_SYS_ROLE PRIMARY KEY (ROLE_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'角色信息表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_ROLE';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'角色ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_ROLE', @level2type=N'COLUMN', @level2name=N'ROLE_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'角色名称', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_ROLE', @level2type=N'COLUMN', @level2name=N'ROLE_NAME';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'角色权限字符串', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_ROLE', @level2type=N'COLUMN', @level2name=N'ROLE_KEY';
@@ -234,6 +238,7 @@ CREATE TABLE SYS_MENU (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_SYS_MENU PRIMARY KEY (MENU_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'菜单权限表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_MENU';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'菜单ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_MENU', @level2type=N'COLUMN', @level2name=N'MENU_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'菜单名称', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_MENU', @level2type=N'COLUMN', @level2name=N'MENU_NAME';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'父菜单ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_MENU', @level2type=N'COLUMN', @level2name=N'PARENT_ID';
@@ -368,6 +373,7 @@ CREATE TABLE SYS_USER_ROLE (
     ROLE_ID BIGINT NOT NULL,
     CONSTRAINT PK_SYS_USER_ROLE PRIMARY KEY (USER_ID, ROLE_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'用户和角色关联表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER_ROLE';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'用户ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER_ROLE', @level2type=N'COLUMN', @level2name=N'USER_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'角色ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER_ROLE', @level2type=N'COLUMN', @level2name=N'ROLE_ID';
 
@@ -384,6 +390,7 @@ CREATE TABLE SYS_ROLE_MENU (
     MENU_ID BIGINT NOT NULL,
     CONSTRAINT PK_SYS_ROLE_MENU PRIMARY KEY (ROLE_ID, MENU_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'角色和菜单关联表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_ROLE_MENU';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'角色ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_ROLE_MENU', @level2type=N'COLUMN', @level2name=N'ROLE_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'菜单ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_ROLE_MENU', @level2type=N'COLUMN', @level2name=N'MENU_ID';
 
@@ -482,6 +489,7 @@ CREATE TABLE SYS_ROLE_DEPT (
     DEPT_ID BIGINT NOT NULL,
     CONSTRAINT PK_SYS_ROLE_DEPT PRIMARY KEY (ROLE_ID, DEPT_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'角色和部门关联表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_ROLE_DEPT';
 
 INSERT INTO SYS_ROLE_DEPT VALUES (2, 100);
 INSERT INTO SYS_ROLE_DEPT VALUES (2, 101);
@@ -497,6 +505,7 @@ CREATE TABLE SYS_USER_POST (
     POST_ID BIGINT NOT NULL,
     CONSTRAINT PK_SYS_USER_POST PRIMARY KEY (USER_ID, POST_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'用户与岗位关联表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER_POST';
 
 INSERT INTO SYS_USER_POST VALUES (1, 1);
 
@@ -534,6 +543,7 @@ CREATE TABLE SYS_OPER_LOG (
     AFTER_VALUE NVARCHAR(MAX),
     CONSTRAINT PK_SYS_OPER_LOG PRIMARY KEY (OPER_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'操作日志记录', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_OPER_LOG';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'操作用户ID(0=匿名)', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_OPER_LOG', @level2type=N'COLUMN', @level2name=N'USER_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'会话ID', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_OPER_LOG', @level2type=N'COLUMN', @level2name=N'SESSION_ID';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'业务主键', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_OPER_LOG', @level2type=N'COLUMN', @level2name=N'BIZ_KEY';
@@ -570,6 +580,7 @@ CREATE TABLE SYS_DICT_TYPE (
     CONSTRAINT PK_SYS_DICT_TYPE PRIMARY KEY (DICT_ID),
     CONSTRAINT UK_SYS_DICT_TYPE UNIQUE (DICT_TYPE)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'字典类型表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_DICT_TYPE';
 
 SET IDENTITY_INSERT sys_dict_type ON;
 INSERT INTO SYS_DICT_TYPE(DICT_ID,DICT_NAME,DICT_TYPE,STATUS,CREATE_BY,CREATE_TIME,UPDATE_BY,UPDATE_TIME,REMARK,VERSION) VALUES(1, '用户性别', 'sys_user_sex',       '0', 'admin', SYSDATETIME(), '', NULL, '用户性别列表', 0);
@@ -606,6 +617,7 @@ CREATE TABLE SYS_DICT_DATA (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_SYS_DICT_DATA PRIMARY KEY (DICT_CODE)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'字典数据表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_DICT_DATA';
 
 SET IDENTITY_INSERT sys_dict_type OFF;
 INSERT INTO SYS_DICT_DATA(DICT_CODE,DICT_SORT,DICT_LABEL,DICT_VALUE,DICT_TYPE,CSS_CLASS,LIST_CLASS,IS_DEFAULT,STATUS,CREATE_BY,CREATE_TIME,UPDATE_BY,UPDATE_TIME,REMARK,VERSION) VALUES(1,  1,'男',    '0',     'sys_user_sex',       '',  '',        'Y','0','admin',SYSDATETIME(),'',NULL,'性别男',0);
@@ -657,6 +669,7 @@ CREATE TABLE SYS_CONFIG (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_SYS_CONFIG PRIMARY KEY (CONFIG_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'参数配置表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_CONFIG';
 
 SET IDENTITY_INSERT sys_config ON;
 INSERT INTO SYS_CONFIG(CONFIG_ID,CONFIG_NAME,CONFIG_KEY,CONFIG_VALUE,CONFIG_TYPE,CREATE_BY,CREATE_TIME,UPDATE_BY,UPDATE_TIME,REMARK,VERSION) VALUES(1,'主框架页-默认皮肤样式名称','sys.index.skinName','skin-blue','Y','admin',SYSDATETIME(),'',NULL,'蓝色skin-blue、绿色skin-green、紫色skin-purple、红色skin-red、黄色skin-yellow',0);
@@ -682,6 +695,7 @@ CREATE TABLE SYS_LOGINFORM (
     ACCESS_TIME DATETIME2(0),
     CONSTRAINT PK_SYS_LOGINFORM PRIMARY KEY (INFO_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'系统访问记录', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_LOGINFORM';
 CREATE INDEX IDX_SYS_LOGINFORM_S  ON SYS_LOGINFORM(STATUS);
 CREATE INDEX IDX_SYS_LOGINFORM_LT ON SYS_LOGINFORM(ACCESS_TIME);
 
@@ -707,6 +721,7 @@ CREATE TABLE SYS_JOB (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_SYS_JOB PRIMARY KEY (JOB_ID, JOB_NAME, JOB_GROUP)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'定时任务调度表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_JOB';
 
 SET IDENTITY_INSERT sys_config OFF;
 SET IDENTITY_INSERT sys_job ON;
@@ -732,6 +747,7 @@ CREATE TABLE SYS_JOB_LOG (
     CREATE_TIME DATETIME2(0),
     CONSTRAINT PK_SYS_JOB_LOG PRIMARY KEY (JOB_LOG_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'定时任务调度日志表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_JOB_LOG';
 
 
 -- ----------------------------
@@ -752,6 +768,7 @@ CREATE TABLE SYS_NOTICE (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_SYS_NOTICE PRIMARY KEY (NOTICE_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'通知公告表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_NOTICE';
 
 SET IDENTITY_INSERT sys_job OFF;
 SET IDENTITY_INSERT sys_notice ON;
@@ -770,6 +787,7 @@ CREATE TABLE SYS_NOTICE_READ (
     CONSTRAINT PK_SYS_NOTICE_READ PRIMARY KEY (READ_ID),
     CONSTRAINT UK_SYS_NOTICE_READ UNIQUE (USER_ID, NOTICE_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'公告已读记录表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_NOTICE_READ';
 CREATE INDEX IDX_SYS_NOTICE_READ_USER ON SYS_NOTICE_READ(USER_ID);
 
 
@@ -803,6 +821,7 @@ CREATE TABLE GEN_TABLE (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_GEN_TABLE PRIMARY KEY (TABLE_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'代码生成业务表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'GEN_TABLE';
 
 
 -- ----------------------------
@@ -835,7 +854,9 @@ CREATE TABLE GEN_TABLE_COLUMN (
     VERSION BIGINT DEFAULT 0,
     CONSTRAINT PK_GEN_TABLE_COLUMN PRIMARY KEY (COLUMN_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'代码生成业务表字段', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'GEN_TABLE_COLUMN';
 
+COMMIT;
 
 -- =========================================================
 -- 等保与扩展（原 V3~V11 并入，2026-09-02 重构为单文件）
@@ -853,6 +874,7 @@ CREATE TABLE SYS_ANON_LOG (
     RESPONSE_CODE BIGINT,
     CONSTRAINT PK_SYS_ANON_LOG PRIMARY KEY (ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'匿名访问审计表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_ANON_LOG';
 CREATE INDEX IDX_ANON_LOG_IP   ON SYS_ANON_LOG(REQUEST_IP);
 CREATE INDEX IDX_ANON_LOG_TIME ON SYS_ANON_LOG(REQUEST_TIME);
 
@@ -865,6 +887,7 @@ CREATE TABLE SYS_USER_PASSWORD_HISTORY (
     CREATE_TIME DATETIME2(0) DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT PK_SYS_USER_PASSWORD_HISTORY PRIMARY KEY (ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'用户密码历史记录表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER_PASSWORD_HISTORY';
 CREATE INDEX IDX_PASSWORD_HISTORY_USER_ID ON SYS_USER_PASSWORD_HISTORY(USER_ID);
 
 -- 用户第三方绑定表，原 V11
@@ -880,6 +903,7 @@ CREATE TABLE SYS_USER_IDENTITY (
     CONSTRAINT UK_SYS_USER_IDENTITY_IDP UNIQUE (IDP_TYPE, IDP_UID),
     CONSTRAINT UK_SYS_USER_IDENTITY_USER UNIQUE (USER_ID, IDP_TYPE)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'用户第三方绑定表（外部ID映射）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER_IDENTITY';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'身份源类型：local/wechat/qq/dingtalk/corp_sso', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER_IDENTITY', @level2type=N'COLUMN', @level2name=N'IDP_TYPE';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'身份源唯一ID（unionid/openid/userid/subject）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SYS_USER_IDENTITY', @level2type=N'COLUMN', @level2name=N'IDP_UID';
 CREATE INDEX IDX_SYS_USER_IDENTITY_USER ON SYS_USER_IDENTITY(USER_ID);
@@ -923,7 +947,20 @@ INSERT INTO SYS_CONFIG(CONFIG_NAME,CONFIG_KEY,CONFIG_VALUE,CONFIG_TYPE,CREATE_BY
 INSERT INTO SYS_CONFIG(CONFIG_NAME,CONFIG_KEY,CONFIG_VALUE,CONFIG_TYPE,CREATE_BY,CREATE_TIME,UPDATE_BY,UPDATE_TIME,REMARK,VERSION) VALUES('密码自定义规则(等保)','sys.account.password.customRules', '["WHITESPACE","ALPHABETICAL_SEQUENCE","NUMERICAL_SEQUENCE","USERNAME"]', 'Y','admin',SYSDATETIME(),'',NULL, 'Passay可自定义启用的规则，JSON数组：WHITESPACE(禁空格)/ALPHABETICAL_SEQUENCE(禁连续字母)/NUMERICAL_SEQUENCE(禁连续数字)/QWERTY_SEQUENCE(禁键盘连续)/USERNAME(禁含用户名)/REPEAT_CHARACTERS(禁重复字符)',0);
 
 -- 密码更新周期与等保权威键同步（原 V10：种子行在前，此处更新为 maxAge 值）
+MERGE INTO SYS_CONFIG T
+USING (
+    SELECT CONFIG_VALUE AS MAX_AGE
+    FROM SYS_CONFIG
+    WHERE CONFIG_KEY = 'sys.account.password.maxAge'
+) S
+ON (T.CONFIG_KEY = 'sys.account.passwordValidateDays')
+WHEN MATCHED THEN
+    UPDATE SET T.CONFIG_VALUE = S.MAX_AGE,
+               T.UPDATE_BY = 'admin',
+               T.UPDATE_TIME = SYSDATETIME(),
+               T.REMARK = '密码更新周期（已与等保权威键sys.account.password.maxAge同步，请以maxAge为准）';
 
+COMMIT;
 
 -- ===================================================================
 -- 以下并入原 V2__add_sample_menus.sql（项目未上线，2026-09 合并为单基线）
@@ -964,4 +1001,22 @@ INSERT INTO SYS_MENU(MENU_ID,MENU_NAME,PARENT_ID,ORDER_NUM,PATH,COMPONENT,QUERY,
 INSERT INTO SYS_MENU(MENU_ID,MENU_NAME,PARENT_ID,ORDER_NUM,PATH,COMPONENT,QUERY,ROUTE_NAME,IS_FRAME,IS_CACHE,MENU_TYPE,VISIBLE,STATUS,PERMS,ICON,CREATE_BY,CREATE_TIME,UPDATE_BY,UPDATE_TIME,REMARK,VERSION) VALUES(3043, '库存修改', 3004, 3, '', '', '', '', 1, 0, 'F', '0', '0', 'sample:stock:edit', '#', 'admin', SYSDATETIME(), '', NULL, '', 0);
 INSERT INTO SYS_MENU(MENU_ID,MENU_NAME,PARENT_ID,ORDER_NUM,PATH,COMPONENT,QUERY,ROUTE_NAME,IS_FRAME,IS_CACHE,MENU_TYPE,VISIBLE,STATUS,PERMS,ICON,CREATE_BY,CREATE_TIME,UPDATE_BY,UPDATE_TIME,REMARK,VERSION) VALUES(3044, '库存删除', 3004, 4, '', '', '', '', 1, 0, 'F', '0', '0', 'sample:stock:remove', '#', 'admin', SYSDATETIME(), '', NULL, '', 0);
 INSERT INTO SYS_MENU(MENU_ID,MENU_NAME,PARENT_ID,ORDER_NUM,PATH,COMPONENT,QUERY,ROUTE_NAME,IS_FRAME,IS_CACHE,MENU_TYPE,VISIBLE,STATUS,PERMS,ICON,CREATE_BY,CREATE_TIME,UPDATE_BY,UPDATE_TIME,REMARK,VERSION) VALUES(3045, '库存导出', 3004, 5, '', '', '', '', 1, 0, 'F', '0', '0', 'sample:stock:export', '#', 'admin', SYSDATETIME(), '', NULL, '', 0);
+-- V2 修复菜单数据引发的前端路由 404（仅数据修正，无结构变更）
+--
+-- 背景：后端 getRouteName 按 path 段兜底生成前端路由名（SysMenuServiceImpl#getRouteName），
+-- 审计中心子菜单与系统管理侧菜单 path 段相同（config/operlog/logininfor），产生同名路由；
+-- vue-router addRoute 同名先移除旧记录，admin 可见全部菜单且审计中心（order_num=9）后注册，
+-- /system/config、/system/operlog、/system/logininfor 被顶替而落入前端 404 兜底页。
+-- 修复：给审计中心子菜单补唯一 ROUTE_NAME（路由名需与视图组件 name 一致以命中 keep-alive，
+-- views/audit/stats/index.vue 已为 name="AuditStats"）。
+UPDATE SYS_MENU SET ROUTE_NAME = 'AuditOperlog'    WHERE MENU_ID = 2001;
+UPDATE SYS_MENU SET ROUTE_NAME = 'AuditLogininfor' WHERE MENU_ID = 2002;
+UPDATE SYS_MENU SET ROUTE_NAME = 'AuditStats'      WHERE MENU_ID = 2003;
+UPDATE SYS_MENU SET ROUTE_NAME = 'AuditSnapshot'   WHERE MENU_ID = 2004;
+UPDATE SYS_MENU SET ROUTE_NAME = 'AuditConfig'     WHERE MENU_ID = 2005;
+
+-- 组件路径错位修正：system/operlog|logininfor/index 在前端仓库不存在（原型迁移遗留），
+-- 实际页面为 monitor/operlog/index、monitor/logininfor/index，日志管理两个子页此前打不开。
+UPDATE SYS_MENU SET COMPONENT = 'monitor/operlog/index'    WHERE MENU_ID = 500;
+UPDATE SYS_MENU SET COMPONENT = 'monitor/logininfor/index' WHERE MENU_ID = 501;
 SET IDENTITY_INSERT sys_menu OFF;

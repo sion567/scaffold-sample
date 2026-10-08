@@ -34,8 +34,10 @@ public class SmsLogResourceImpl extends BaseController implements SmsLogResource
 
   @Override
   @RequiresPermissions("message:smsLog:list")
-  public TableDataInfo list(MsgSmsLog query) {
-    return logService.queryPage(query, TableSupport.buildPageRequest());
+  public TableDataInfo list(String mobile, String sendStatus, String templateCode, String channelType,
+                            String bizType, String beginTime, String endTime) {
+    return logService.queryPage(buildLogQuery(mobile, sendStatus, templateCode, channelType, bizType, beginTime, endTime),
+        TableSupport.buildPageRequest());
   }
 
   @Override
@@ -61,13 +63,29 @@ public class SmsLogResourceImpl extends BaseController implements SmsLogResource
   @Override
   @RequiresPermissions("message:smsLog:export")
   @Log(title = "短信日志导出", businessType = BusinessType.EXPORT)
-  public byte[] export(MsgSmsLog query) {
-    List<MsgSmsLog> list = logService.queryList(query);
+  public byte[] export(String mobile, String sendStatus, String templateCode, String channelType,
+                       String bizType, String beginTime, String endTime) {
+    List<MsgSmsLog> list = logService.queryList(
+        buildLogQuery(mobile, sendStatus, templateCode, channelType, bizType, beginTime, endTime));
     for (MsgSmsLog log : list) {
       log.setMobile(maskMobile(log.getMobile()));
     }
     ExcelUtil<MsgSmsLog> util = new ExcelUtil<MsgSmsLog>(MsgSmsLog.class);
-    return util.exportExcel(list, "短信发送日志");
+    return util.exportExcel(list, "短信日志");
+  }
+
+  /** 日志查询条件（接口层过滤字段摊平后的装配；时间走 params 供 dateRangeIf 消费） */
+  private MsgSmsLog buildLogQuery(String mobile, String sendStatus, String templateCode, String channelType,
+                                  String bizType, String beginTime, String endTime) {
+    MsgSmsLog query = new MsgSmsLog();
+    query.setMobile(mobile);
+    query.setSendStatus(sendStatus);
+    query.setTemplateCode(templateCode);
+    query.setChannelType(channelType);
+    query.setBizType(bizType);
+    query.getParams().put("beginTime", beginTime);
+    query.getParams().put("endTime", endTime);
+    return query;
   }
 
   /** 手机号中间四位脱敏（138****5678） */

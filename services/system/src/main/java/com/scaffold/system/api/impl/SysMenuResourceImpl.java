@@ -29,10 +29,10 @@ public class SysMenuResourceImpl extends BaseController implements SysMenuResour
 
     @RequiresPermissions("system:menu:list")
     @Override
-    public AjaxResult list(SysMenu menu)
+    public AjaxResult list(String menuName, String status)
     {
         Long userId = SecurityUtils.getUserId();
-        List<SysMenu> menus = menuService.selectMenuList(menu, userId);
+        List<SysMenu> menus = menuService.selectMenuList(buildMenuQuery(menuName, status), userId);
         return success(menus);
     }
 
@@ -44,11 +44,20 @@ public class SysMenuResourceImpl extends BaseController implements SysMenuResour
     }
 
     @Override
-    public AjaxResult treeselect(SysMenu menu)
+    public AjaxResult treeselect(String menuName, String status)
     {
         Long userId = SecurityUtils.getUserId();
-        List<SysMenu> menus = menuService.selectMenuList(menu, userId);
+        List<SysMenu> menus = menuService.selectMenuList(buildMenuQuery(menuName, status), userId);
         return success(menuService.buildMenuTreeSelect(menus));
+    }
+
+    /** 菜单查询条件（接口层过滤字段摊平后的装配） */
+    private SysMenu buildMenuQuery(String menuName, String status)
+    {
+        SysMenu menu = new SysMenu();
+        menu.setMenuName(menuName);
+        menu.setStatus(status);
+        return menu;
     }
 
     @Override

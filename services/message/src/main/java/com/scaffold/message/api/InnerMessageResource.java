@@ -1,6 +1,5 @@
 package com.scaffold.message.api;
 
-import org.springframework.web.bind.annotation.ModelAttribute;
 import com.scaffold.common.core.web.domain.AjaxResult;
 import com.scaffold.common.core.web.page.TableDataInfo;
 import com.scaffold.message.domain.MsgInnerMessage;
@@ -21,8 +20,18 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @RequestMapping("/message/inner/message")
 public interface InnerMessageResource {
+  /**
+   * 管理端消息列表。过滤字段摊平为 @RequestParam：Dubbo Triple REST 对显式
+   * {@code @ModelAttribute} 会误读 required 属性而 500（同 system 服务约定）。
+   */
   @GetMapping("/list")
-  TableDataInfo list(@ModelAttribute MsgInnerMessage query);
+  TableDataInfo list(@RequestParam(value = "receiverId", required = false) Long receiverId,
+                     @RequestParam(value = "receiverName", required = false) String receiverName,
+                     @RequestParam(value = "readFlag", required = false) String readFlag,
+                     @RequestParam(value = "templateCode", required = false) String templateCode,
+                     @RequestParam(value = "bizType", required = false) String bizType,
+                     @RequestParam(value = "beginTime", required = false) String beginTime,
+                     @RequestParam(value = "endTime", required = false) String endTime);
 
   /** 人工发送：body {templateCode, params: {k:v}, receiverIds: [], jumpUrl} */
   @PostMapping("/send")

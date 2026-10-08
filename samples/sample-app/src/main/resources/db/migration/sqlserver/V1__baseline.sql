@@ -22,6 +22,7 @@ CREATE TABLE SAMPLE_CUSTOMER (
     UPDATE_TIME DATETIME2,
     CONSTRAINT PK_SAMPLE_CUSTOMER PRIMARY KEY (CUSTOMER_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'样例客户表（单表 CRUD 案例）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SAMPLE_CUSTOMER';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'状态（0正常 1停用）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SAMPLE_CUSTOMER', @level2type=N'COLUMN', @level2name=N'STATUS';
 
 -- ---------- 树表：商品分类 ----------
@@ -39,6 +40,7 @@ CREATE TABLE SAMPLE_CATEGORY (
     UPDATE_TIME DATETIME2,
     CONSTRAINT PK_SAMPLE_CATEGORY PRIMARY KEY (CATEGORY_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'样例商品分类表（树表案例）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SAMPLE_CATEGORY';
 
 -- ---------- 主表：订单 ----------
 
@@ -56,6 +58,7 @@ CREATE TABLE SAMPLE_ORDER (
     UPDATE_TIME DATETIME2,
     CONSTRAINT PK_SAMPLE_ORDER PRIMARY KEY (ORDER_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'样例订单表（主子表 + 工作流案例）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SAMPLE_ORDER';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'状态（0待提交 1审批中 2已通过 3已驳回）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SAMPLE_ORDER', @level2type=N'COLUMN', @level2name=N'STATUS';
 
 -- ---------- 子表：订单明细 ----------
@@ -68,6 +71,7 @@ CREATE TABLE SAMPLE_ORDER_ITEM (
     PRICE DECIMAL(12,2) DEFAULT 0,
     CONSTRAINT PK_SAMPLE_ORDER_ITEM PRIMARY KEY (ITEM_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'样例订单明细表（主子表案例）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SAMPLE_ORDER_ITEM';
 
 -- ---------- 单表：库存 ----------
 
@@ -81,6 +85,7 @@ CREATE TABLE SAMPLE_STOCK (
     UPDATE_TIME DATETIME2,
     CONSTRAINT PK_SAMPLE_STOCK PRIMARY KEY (STOCK_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'样例库存表（单表 CRUD + 低量预警任务案例）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'SAMPLE_STOCK';
 
 -- ---------- 种子数据 ----------
 SET IDENTITY_INSERT sample_customer ON;

@@ -1,6 +1,6 @@
 package com.scaffold.system.api;
 
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,8 +15,13 @@ import com.scaffold.system.api.domain.SysDept;
 @RequestMapping("/dept")
 public interface SysDeptResource
 {
+    /**
+     * 部门列表（过滤字段摊平为 @RequestParam：Dubbo Triple REST 对显式
+     * {@code @ModelAttribute} 会误读 required 属性而 500，参见 SysRoleResource#list）
+     */
     @GetMapping("/list")
-    AjaxResult list(@ModelAttribute SysDept dept);
+    AjaxResult list(@RequestParam(value = "deptName", required = false) String deptName,
+                    @RequestParam(value = "status", required = false) String status);
 
     @GetMapping("/list/exclude/{deptId}")
     AjaxResult excludeChild(@PathVariable("deptId") Long deptId);

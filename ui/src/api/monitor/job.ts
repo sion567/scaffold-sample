@@ -36,7 +36,7 @@ export interface SysJobQuery extends PageQuery {
 // 查询定时任务调度列表
 export function listJob(query: SysJobQuery): Promise<TableDataInfo<SysJob>> {
   return request({
-    url: '/monitor/job/list',
+    url: '/job/job/list',
     method: 'get',
     params: query
   })
@@ -45,7 +45,7 @@ export function listJob(query: SysJobQuery): Promise<TableDataInfo<SysJob>> {
 // 查询定时任务调度详细
 export function getJob(jobId: number | string | number[]): Promise<AjaxResult<SysJob>> {
   return request({
-    url: '/monitor/job/' + jobId,
+    url: '/job/job/' + jobId,
     method: 'get'
   })
 }
@@ -53,7 +53,7 @@ export function getJob(jobId: number | string | number[]): Promise<AjaxResult<Sy
 // 新增定时任务调度
 export function addJob(data: SysJob): Promise<AjaxResult<null>> {
   return request({
-    url: '/monitor/job',
+    url: '/job/job',
     method: 'post',
     data: data
   })
@@ -62,7 +62,7 @@ export function addJob(data: SysJob): Promise<AjaxResult<null>> {
 // 修改定时任务调度
 export function updateJob(data: SysJob): Promise<AjaxResult<null>> {
   return request({
-    url: '/monitor/job',
+    url: '/job/job',
     method: 'put',
     data: data
   })
@@ -71,7 +71,7 @@ export function updateJob(data: SysJob): Promise<AjaxResult<null>> {
 // 删除定时任务调度
 export function delJob(jobId: number | string | number[]): Promise<AjaxResult<null>> {
   return request({
-    url: '/monitor/job/' + jobId,
+    url: '/job/job/' + jobId,
     method: 'delete'
   })
 }
@@ -83,7 +83,7 @@ export function changeJobStatus(jobId: number | string | number[], status: strin
     status
   }
   return request({
-    url: '/monitor/job/changeStatus',
+    url: '/job/job/changeStatus',
     method: 'put',
     data: data
   })
@@ -97,7 +97,7 @@ export function runJob(jobId: number | string | number[], jobGroup: string): Pro
     jobGroup
   }
   return request({
-    url: '/monitor/job/run',
+    url: '/job/job/run',
     method: 'put',
     data: data
   })

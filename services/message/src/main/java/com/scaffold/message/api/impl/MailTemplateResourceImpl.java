@@ -30,7 +30,13 @@ public class MailTemplateResourceImpl extends BaseController implements MailTemp
 
   @Override
   @RequiresPermissions("message:mailTemplate:list")
-  public TableDataInfo list(MsgMailTemplate query) {
+  public TableDataInfo list(String templateCode, String templateName, Long accountId, String category, String status) {
+    MsgMailTemplate query = new MsgMailTemplate();
+    query.setTemplateCode(templateCode);
+    query.setTemplateName(templateName);
+    query.setAccountId(accountId);
+    query.setCategory(category);
+    query.setStatus(status);
     return templateService.queryPage(query, TableSupport.buildPageRequest());
   }
 

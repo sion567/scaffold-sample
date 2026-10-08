@@ -30,7 +30,11 @@ public class MailAccountResourceImpl extends BaseController implements MailAccou
 
   @Override
   @RequiresPermissions("message:mailAccount:list")
-  public TableDataInfo list(MsgMailAccount query) {
+  public TableDataInfo list(String accountName, String emailAddr, String status) {
+    MsgMailAccount query = new MsgMailAccount();
+    query.setAccountName(accountName);
+    query.setEmailAddr(emailAddr);
+    query.setStatus(status);
     return accountService.queryPage(query, TableSupport.buildPageRequest());
   }
 

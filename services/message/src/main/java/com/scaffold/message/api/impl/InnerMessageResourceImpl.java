@@ -43,7 +43,16 @@ public class InnerMessageResourceImpl extends BaseController implements InnerMes
 
   @Override
   @RequiresPermissions("message:innerMessage:list")
-  public TableDataInfo list(MsgInnerMessage query) {
+  public TableDataInfo list(Long receiverId, String receiverName, String readFlag, String templateCode,
+                            String bizType, String beginTime, String endTime) {
+    MsgInnerMessage query = new MsgInnerMessage();
+    query.setReceiverId(receiverId);
+    query.setReceiverName(receiverName);
+    query.setReadFlag(readFlag);
+    query.setTemplateCode(templateCode);
+    query.setBizType(bizType);
+    query.getParams().put("beginTime", beginTime);
+    query.getParams().put("endTime", endTime);
     return messageService.queryPage(query, TableSupport.buildPageRequest());
   }
 

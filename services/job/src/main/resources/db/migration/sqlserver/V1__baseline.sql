@@ -26,6 +26,7 @@ CREATE TABLE QRTZ_JOB_DETAILS (
     JOB_DATA VARBINARY(MAX),
     CONSTRAINT PK_QRTZ_JOB_DETAILS PRIMARY KEY (SCHED_NAME, JOB_NAME, JOB_GROUP)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'任务详细信息表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'QRTZ_JOB_DETAILS';
 
 -- 2、触发器详细信息表
 
@@ -48,6 +49,7 @@ CREATE TABLE QRTZ_TRIGGERS (
     JOB_DATA VARBINARY(MAX),
     CONSTRAINT PK_QRTZ_TRIGGERS PRIMARY KEY (SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'触发器详细信息表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'QRTZ_TRIGGERS';
 
 -- 外键
 ALTER TABLE QRTZ_TRIGGERS ADD CONSTRAINT FK_QRTZ_TRIGGERS_JD
@@ -100,6 +102,7 @@ CREATE TABLE QRTZ_CALENDARS (
     CALENDAR VARBINARY(MAX) NOT NULL,
     CONSTRAINT PK_QRTZ_CALENDARS PRIMARY KEY (SCHED_NAME, CALENDAR_NAME)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'日历信息表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'QRTZ_CALENDARS';
 
 -- 7、暂停的触发器表
 
@@ -108,6 +111,7 @@ CREATE TABLE QRTZ_PAUSED_TRIGGER_GRPS (
     TRIGGER_GROUP NVARCHAR(200) NOT NULL,
     CONSTRAINT PK_QRTZ_PAUSED_TRIGGER_GRPS PRIMARY KEY (SCHED_NAME, TRIGGER_GROUP)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'暂停的触发器表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'QRTZ_PAUSED_TRIGGER_GRPS';
 
 -- 8、已触发的触发器表
 
@@ -127,6 +131,7 @@ CREATE TABLE QRTZ_FIRED_TRIGGERS (
     REQUESTS_RECOVERY NVARCHAR(1),
     CONSTRAINT PK_QRTZ_FIRED_TRIGGERS PRIMARY KEY (SCHED_NAME, ENTRY_ID)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'已触发的触发器表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'QRTZ_FIRED_TRIGGERS';
 
 -- 9、调度器状态表
 
@@ -137,6 +142,7 @@ CREATE TABLE QRTZ_SCHEDULER_STATE (
     CHECKIN_INTERVAL BIGINT NOT NULL,
     CONSTRAINT PK_QRTZ_SCHEDULER_STATE PRIMARY KEY (SCHED_NAME, INSTANCE_NAME)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'调度器状态表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'QRTZ_SCHEDULER_STATE';
 
 -- 10、悲观锁信息表
 
@@ -145,6 +151,7 @@ CREATE TABLE QRTZ_LOCKS (
     LOCK_NAME NVARCHAR(40) NOT NULL,
     CONSTRAINT PK_QRTZ_LOCKS PRIMARY KEY (SCHED_NAME, LOCK_NAME)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'存储的悲观锁信息表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'QRTZ_LOCKS';
 
 -- 11、同步机制的行锁表
 
@@ -168,6 +175,7 @@ CREATE TABLE QRTZ_SIMPROP_TRIGGERS (
 ALTER TABLE QRTZ_SIMPROP_TRIGGERS ADD CONSTRAINT FK_QRTZ_SIMPROP_TG
     FOREIGN KEY (SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP) REFERENCES QRTZ_TRIGGERS(SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP);
 
+COMMIT;
 
 -- ===================================================================
 -- 以下并入原 V2__init_job_data.sql（占位）与 V3__create_sys_job_tables.sql（2026-09 合并为单基线）

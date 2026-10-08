@@ -44,13 +44,20 @@ public class SysRoleResourceImpl extends BaseController implements SysRoleResour
 
     @RequiresPermissions("system:role:list")
     @Override
-    public TableDataInfo list(Integer pageNum, Integer pageSize, String orderByColumn, String isAsc, SysRole role)
+    public TableDataInfo list(Integer pageNum, Integer pageSize, String orderByColumn, String isAsc,
+                              String roleName, String roleKey, String status, String beginTime, String endTime)
     {
         PageDomain page = new PageDomain();
         page.setPageNum(pageNum);
         page.setPageSize(pageSize);
         page.setOrderByColumn(orderByColumn);
         page.setIsAsc(isAsc);
+        SysRole role = new SysRole();
+        role.setRoleName(roleName);
+        role.setRoleKey(roleKey);
+        role.setStatus(status);
+        role.getParams().put("beginTime", beginTime);
+        role.getParams().put("endTime", endTime);
         return roleService.selectRolePage(role, page);
     }
 
@@ -146,26 +153,40 @@ public class SysRoleResourceImpl extends BaseController implements SysRoleResour
 
     @RequiresPermissions("system:role:list")
     @Override
-    public TableDataInfo allocatedList(Integer pageNum, Integer pageSize, String orderByColumn, String isAsc, SysUser user)
+    public TableDataInfo allocatedList(Integer pageNum, Integer pageSize, String orderByColumn, String isAsc,
+                                       Long roleId, String userName, String phonenumber)
     {
         PageDomain page = new PageDomain();
         page.setPageNum(pageNum);
         page.setPageSize(pageSize);
         page.setOrderByColumn(orderByColumn);
         page.setIsAsc(isAsc);
+        SysUser user = buildAuthUserQuery(roleId, userName, phonenumber);
         return userService.selectAllocatedPage(user, page);
     }
 
     @RequiresPermissions("system:role:list")
     @Override
-    public TableDataInfo unallocatedList(Integer pageNum, Integer pageSize, String orderByColumn, String isAsc, SysUser user)
+    public TableDataInfo unallocatedList(Integer pageNum, Integer pageSize, String orderByColumn, String isAsc,
+                                         Long roleId, String userName, String phonenumber)
     {
         PageDomain page = new PageDomain();
         page.setPageNum(pageNum);
         page.setPageSize(pageSize);
         page.setOrderByColumn(orderByColumn);
         page.setIsAsc(isAsc);
+        SysUser user = buildAuthUserQuery(roleId, userName, phonenumber);
         return userService.selectUnallocatedPage(user, page);
+    }
+
+    /** 已分配/未分配用户查询条件（roleId 走 params，selectAllocatedList 从中取） */
+    private SysUser buildAuthUserQuery(Long roleId, String userName, String phonenumber)
+    {
+        SysUser user = new SysUser();
+        user.setUserName(userName);
+        user.setPhonenumber(phonenumber);
+        user.getParams().put("roleId", roleId);
+        return user;
     }
 
     @RequiresPermissions("system:role:edit")

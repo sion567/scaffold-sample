@@ -27,8 +27,11 @@ public class SysDeptResourceImpl extends BaseController implements SysDeptResour
 
     @RequiresPermissions("system:dept:list")
     @Override
-    public AjaxResult list(SysDept dept)
+    public AjaxResult list(String deptName, String status)
     {
+        SysDept dept = new SysDept();
+        dept.setDeptName(deptName);
+        dept.setStatus(status);
         return success(deptService.selectDeptList(dept));
     }
 

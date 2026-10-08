@@ -1,6 +1,5 @@
 package com.scaffold.message.api;
 
-import org.springframework.web.bind.annotation.ModelAttribute;
 import com.scaffold.common.core.web.domain.AjaxResult;
 import com.scaffold.common.core.web.page.TableDataInfo;
 import com.scaffold.message.domain.MsgMailAccount;
@@ -20,8 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @RequestMapping("/message/mail/account")
 public interface MailAccountResource {
+  /**
+   * 账号列表。过滤字段摊平为 @RequestParam：Dubbo Triple REST 对显式
+   * {@code @ModelAttribute} 会误读 required 属性而 500（同 system 服务约定）。
+   */
   @GetMapping("/list")
-  TableDataInfo list(@ModelAttribute MsgMailAccount query);
+  TableDataInfo list(@RequestParam(value = "accountName", required = false) String accountName,
+                     @RequestParam(value = "emailAddr", required = false) String emailAddr,
+                     @RequestParam(value = "status", required = false) String status);
 
   @GetMapping("/{id}")
   AjaxResult getInfo(@PathVariable("id") Long id);

@@ -51,7 +51,9 @@ IDENTITY_RE = re.compile(
     re.IGNORECASE,
 )
 
-COMMENT_TABLE_RE = re.compile(r"^\s*COMMENT\s+ON\s+TABLE\s+([\w]+)\s+IS\s+'(.*)'\s*;?\s*$", re.IGNORECASE)
+# 表注释同样支持可选 schema 前缀（与下方 COLUMN 一致）；否则 COMMENT ON TABLE XXX_DB.T
+# 不匹配、表注释在家族基线中被静默丢弃，而落入 DML 透传分支后 mysql 无法执行
+COMMENT_TABLE_RE = re.compile(r"^\s*COMMENT\s+ON\s+TABLE\s+(?:[\w]+\.)?([\w]+)\s+IS\s+'(.*)'\s*;?\s*$", re.IGNORECASE)
 # 可选 schema 前缀：SYSTEM_DB.SYS_DEPT.DEPT_ID → 表=SYS_DEPT 列=DEPT_ID（.+? 非贪婪会把三段错位成两段，必须显式可选段）
 COMMENT_COLUMN_RE = re.compile(r"^\s*COMMENT\s+ON\s+COLUMN\s+(?:[\w]+\.)?([\w]+)\.([\w]+)\s+IS\s+'(.*)'\s*;?\s*$", re.IGNORECASE)
 
@@ -225,7 +227,26 @@ def parse_h2_scripts(files):
 
             if stripped.startswith("--") or not stripped:
                 statements.append(("raw", stripped))
+                i += 1
+                continue
+
+            # 其余语句（UPDATE/DELETE/MERGE 等 DML）：整句透传，emit 时统一剥
+            # schema 前缀并映射时间令牌。没有此兜底时新增迁移里的 DML 会被静默丢弃。
+            if re.search(r";\s*$", stripped):
+                statements.append(("raw", strip_prefix(stripped)))
+                i += 1
+                continue
+            buf = [line.rstrip()]
             i += 1
+            while i < len(lines) and not re.search(r";\s*$", lines[i]):
+                buf.append(lines[i].rstrip())
+                i += 1
+            if i >= len(lines):
+                raise SystemExit("语句未正常结束(缺分号): %s" % " ".join(buf)[:80])
+            buf.append(lines[i].rstrip())
+            i += 1
+            statements.append(("raw", strip_prefix("\n".join(buf))))
+            continue
     return tables, statements
 
 

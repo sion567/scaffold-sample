@@ -27,7 +27,7 @@ CREATE TABLE gen_table (
     update_time DATETIME COMMENT '更新时间',
     remark VARCHAR(500) COMMENT '备注',
     CONSTRAINT pk_gen_table PRIMARY KEY (table_id)
-) ENGINE=InnoDB AUTO_INCREMENT=100;
+) ENGINE=InnoDB AUTO_INCREMENT=100 COMMENT='代码生成业务表';
 
 
 
@@ -55,7 +55,7 @@ CREATE TABLE gen_table_column (
     update_by VARCHAR(64) DEFAULT '' COMMENT '更新者',
     update_time DATETIME COMMENT '更新时间',
     CONSTRAINT pk_gen_table_column PRIMARY KEY (column_id)
-) ENGINE=InnoDB AUTO_INCREMENT=100;
+) ENGINE=InnoDB AUTO_INCREMENT=100 COMMENT='代码生成业务表字段';
 
 
 -- ===================================================================

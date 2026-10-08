@@ -28,6 +28,7 @@ CREATE TABLE gen_table (
     remark NVARCHAR(500),
     CONSTRAINT pk_gen_table PRIMARY KEY (table_id)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'代码生成业务表', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'gen_table';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'编号', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'gen_table', @level2type=N'COLUMN', @level2name=N'table_id';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'表名称', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'gen_table', @level2type=N'COLUMN', @level2name=N'table_name';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'表描述', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'gen_table', @level2type=N'COLUMN', @level2name=N'table_comment';
@@ -78,6 +79,7 @@ CREATE TABLE gen_table_column (
     update_time DATETIME2,
     CONSTRAINT pk_gen_table_column PRIMARY KEY (column_id)
 );
+EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'代码生成业务表字段', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'gen_table_column';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'编号', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'gen_table_column', @level2type=N'COLUMN', @level2name=N'column_id';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'归属表编号', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'gen_table_column', @level2type=N'COLUMN', @level2name=N'table_id';
 EXEC sp_addextendedproperty @name=N'MS_Description', @value=N'列名称', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'gen_table_column', @level2type=N'COLUMN', @level2name=N'column_name';

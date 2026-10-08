@@ -34,8 +34,10 @@ public class MailLogResourceImpl extends BaseController implements MailLogResour
 
   @Override
   @RequiresPermissions("message:mailLog:list")
-  public TableDataInfo list(MsgMailLog query) {
-    return logService.queryPage(query, TableSupport.buildPageRequest());
+  public TableDataInfo list(String toAddrs, String sendStatus, String templateCode, String bizType,
+                            String beginTime, String endTime) {
+    return logService.queryPage(buildLogQuery(toAddrs, sendStatus, templateCode, bizType, beginTime, endTime),
+        TableSupport.buildPageRequest());
   }
 
   @Override
@@ -61,9 +63,24 @@ public class MailLogResourceImpl extends BaseController implements MailLogResour
   @Override
   @RequiresPermissions("message:mailLog:export")
   @Log(title = "邮件记录导出", businessType = BusinessType.EXPORT)
-  public byte[] export(MsgMailLog query) {
-    List<MsgMailLog> list = logService.queryList(query);
+  public byte[] export(String toAddrs, String sendStatus, String templateCode, String bizType,
+                       String beginTime, String endTime) {
+    List<MsgMailLog> list = logService.queryList(
+        buildLogQuery(toAddrs, sendStatus, templateCode, bizType, beginTime, endTime));
     ExcelUtil<MsgMailLog> util = new ExcelUtil<MsgMailLog>(MsgMailLog.class);
     return util.exportExcel(list, "邮件发送记录");
+  }
+
+  /** 日志查询条件（接口层过滤字段摊平后的装配；时间走 params 供 dateRangeIf 消费） */
+  private MsgMailLog buildLogQuery(String toAddrs, String sendStatus, String templateCode, String bizType,
+                                   String beginTime, String endTime) {
+    MsgMailLog query = new MsgMailLog();
+    query.setToAddrs(toAddrs);
+    query.setSendStatus(sendStatus);
+    query.setTemplateCode(templateCode);
+    query.setBizType(bizType);
+    query.getParams().put("beginTime", beginTime);
+    query.getParams().put("endTime", endTime);
+    return query;
   }
 }
